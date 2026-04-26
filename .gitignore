@@ -21,3 +21,8 @@ desktop.ini
 
 # ===== Claudian AI 助手会话文件（对话历史，无需版本管理）=====
 .claudian/sessions/
+
+# ===== 插件自动生成的缓存（可随时重建）=====
+.obsidian/plugins/text-extractor/cache/
+.smart-env/multi/
+.smart-env/event_logs/
