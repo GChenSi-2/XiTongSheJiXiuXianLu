@@ -1,0 +1,23 @@
+# ===== Obsidian 内部状态（高频变动、无需版本管理）=====
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspaces.json
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 垃圾桶 =====
+.trash/
+
+# ===== 临时文件 =====
+*.tmp
+*.bak
+*.swp
+
+# ===== 如果你用 Dataview 生成的缓存 =====
+.obsidian/plugins/dataview/data.json
+
+# ===== Claudian AI 助手会话文件（对话历史，无需版本管理）=====
+.claudian/sessions/

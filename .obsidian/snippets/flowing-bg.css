@@ -1,0 +1,82 @@
+/* ===== 流动柔和背景(兼容 Minimal 主题 · 性能优化版) ===== */
+
+/* 1. 渐变动画层:提升到 GPU 独立图层,不触发主页面重绘 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -30%;
+  z-index: 0;
+  pointer-events: none;
+  /* will-change + translateZ(0) 强制浏览器为此元素分配独立 GPU 图层 */
+  will-change: transform;
+  transform: translateZ(0);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(120, 145, 210, 0.34), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(185, 160, 225, 0.30), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(135, 195, 205, 0.30), transparent 55%),
+    radial-gradient(circle at 90% 70%, rgba(215, 165, 185, 0.26), transparent 45%);
+  filter: blur(48px) saturate(102%);
+  animation: flow 40s ease-in-out infinite alternate;
+}
+
+@keyframes flow {
+  0%   { transform: translate3d(0, 0, 0)       scale(1)    rotate(0deg); }
+  25%  { transform: translate3d(-6%, 4%, 0)    scale(1.08) rotate(2deg); }
+  50%  { transform: translate3d(5%, -5%, 0)    scale(1.05) rotate(-1deg); }
+  75%  { transform: translate3d(-3%, -4%, 0)   scale(1.1)  rotate(1.5deg); }
+  100% { transform: translate3d(4%, 3%, 0)     scale(1.03) rotate(-0.5deg); }
+}
+
+/* 2. body 底色 */
+body {
+  background-color: #1a1d25 !important;
+}
+
+/* 3. 中间容器全部透明,让渐变透上来 */
+.app-container,
+.horizontal-main-container,
+.workspace,
+.workspace-split,
+.workspace-tabs,
+.workspace-tab-container,
+.workspace-leaf,
+.workspace-leaf-content,
+.mod-root,
+.mod-left-split,
+.mod-right-split,
+.workspace-ribbon,
+.view-content {
+  background-color: transparent !important;
+}
+
+/* 4. 编辑/阅读区域:纯半透明底色,不用 backdrop-filter
+      —— .cm-editor 是打字区域,每次输入都重绘,加 backdrop-filter 会显著掉帧 */
+.markdown-source-view,
+.markdown-preview-view,
+.markdown-reading-view,
+.cm-editor,
+.cm-scroller {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* 5. 侧边栏:去掉 backdrop-filter,改用纯半透明底色
+      —— 文件列表滚动时 backdrop-filter 也会持续触发重绘 */
+.mod-left-split .workspace-leaf-content,
+.mod-right-split .workspace-leaf-content {
+  background-color: rgba(20, 22, 28, 0.50) !important;
+}
+
+/* 6. 状态栏:干净的实色设计,明确的视觉层级,无任何滤镜开销 */
+.status-bar {
+  background-color: rgba(20, 23, 31, 0.92) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* 7. 滚动条:仅覆盖 hover / active 亮度,其余保持主题默认 */
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.38) !important;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.60) !important;
+}

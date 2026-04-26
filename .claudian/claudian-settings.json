@@ -1,0 +1,71 @@
+{
+  "userName": "",
+  "permissionMode": "yolo",
+  "model": "sonnet",
+  "thinkingBudget": "low",
+  "effortLevel": "high",
+  "serviceTier": "default",
+  "enableAutoTitleGeneration": true,
+  "titleGenerationModel": "",
+  "excludedTags": [],
+  "mediaFolder": "",
+  "systemPrompt": "",
+  "persistentExternalContextPaths": [],
+  "sharedEnvironmentVariables": "",
+  "envSnippets": [],
+  "customContextLimits": {},
+  "keyboardNavigation": {
+    "scrollUpKey": "w",
+    "scrollDownKey": "s",
+    "focusInputKey": "i"
+  },
+  "locale": "en",
+  "providerConfigs": {
+    "claude": {
+      "safeMode": "acceptEdits",
+      "cliPath": "",
+      "cliPathsByHost": {
+        "DESKTOP-OUT1C7N": "C:\\Users\\user\\.local\\bin\\claude.exe"
+      },
+      "loadUserSettings": true,
+      "enableChrome": false,
+      "enableBangBash": true,
+      "enableOpus1M": true,
+      "enableSonnet1M": false,
+      "customModels": "",
+      "lastModel": "sonnet",
+      "environmentVariables": "",
+      "environmentHash": ""
+    },
+    "codex": {
+      "enabled": true,
+      "safeMode": "workspace-write",
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "reasoningSummary": "auto",
+      "environmentVariables": "",
+      "environmentHash": "",
+      "installationMethodsByHost": {
+        "DESKTOP-OUT1C7N": "native-windows"
+      },
+      "wslDistroOverridesByHost": {}
+    }
+  },
+  "settingsProvider": "claude",
+  "savedProviderModel": {
+    "claude": "sonnet"
+  },
+  "savedProviderEffort": {
+    "claude": "high"
+  },
+  "savedProviderServiceTier": {},
+  "savedProviderThinkingBudget": {
+    "claude": "low"
+  },
+  "lastCustomModel": "",
+  "maxTabs": 5,
+  "tabBarPosition": "input",
+  "enableAutoScroll": true,
+  "openInMainTab": false,
+  "hiddenProviderCommands": {}
+}

@@ -1,0 +1,16 @@
+{
+  "activeProfile": {},
+  "profileUpdate": true,
+  "profileUpdateDelay": 800,
+  "uiUpdate": true,
+  "uiUpdateInterval": 1000,
+  "devices": {
+    "ce552371686814e0b48b740688abdcdddb964312d9eec6dad3c69cb0bf29799a": "C:\\Users\\user\\AppData\\Local\\ObsidianPlugins\\Data\\Profiles"
+  },
+  "statusbarInteraction": {
+    "click": "auto",
+    "ctrl_click": "none",
+    "shift_click": "none",
+    "alt_click": "none"
+  }
+}
