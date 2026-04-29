@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "type": "group",
+      "ctime": 1777468568910,
+      "items": [
+        {
+          "type": "file",
+          "ctime": 1777468903308,
+          "path": "OSpdf/cpu-dialogue.pdf"
+        },
+        {
+          "type": "file",
+          "ctime": 1777468623550,
+          "path": "OSpdf/cpu-intro.pdf"
+        },
+        {
+          "type": "file",
+          "ctime": 1777468633606,
+          "path": "OSpdf/cpu-mechanisms.pdf"
+        }
+      ],
+      "title": "operating system"
+    },
+    {
+      "type": "group",
+      "ctime": 1777468913091,
+      "items": [],
+      "title": "Bioinformatics"
+    },
+    {
+      "type": "group",
+      "ctime": 1777468933303,
+      "items": [],
+      "title": "Frontend Notebook"
+    }
+  ]
+}
