@@ -1,0 +1,78 @@
+/* ===== PDF 查看器 · 源头透明版（已启用 Adapt to theme）===== */
+/*
+ * 前提：PDF 工具栏 / DevTools 已启用 「Adapt to theme」
+ *       → .pdf-container 自动加 .mod-themed class
+ *       → PDF.js 读 --pdf-page-background 作 canvas 填充色
+ *       → PDF.js 自动 pageInvert：深色主题下，PDF 文字直接渲染成白色
+ *
+ * 设计原则：
+ *   1. canvas 自己就是透明的（没有白底也没有黑底）
+ *   2. 文字由 PDF.js 在透明 canvas 上直接画白色（深色主题反转）
+ *   3. 不再需要 filter / mix-blend-mode 任何"事后修补"
+ *   4. .page 也透明 → 工作区 100% 直接透出
+ *   5. 仅靠 box-shadow + border-radius 维持卡片视觉
+ */
+
+/* ── 1. ★★ 源头：canvas 绘制时用全透明填底
+   这一行单独完成了"去掉 PDF 背景色 + 调高透明度"的所有工作。 */
+:root,
+html body,
+html body.theme-dark {
+  --pdf-page-background: transparent !important;
+}
+
+/* ── 2. 顶层容器：彻底透明（避免父级背景挡住）─────────────── */
+html body .pdf-container,
+html body .pdf-content-container,
+html body .pdf-viewer-container,
+html body .pdfViewer {
+  background: transparent !important;
+}
+
+/* ── 3. ★ canvasWrapper：仅保留 screen 混合，让黑底透明化
+   - filter:none → 不要二次反转（PDF.js pageInvert 已处理过）
+   - mix-blend-mode:screen → canvas 黑色像素 → 显示下层工作区
+   - opacity:1 → 文字最锐利
+
+   原理：PDF.js pageInvert 后，canvas 是「黑底 + 白字」
+        screen(0黑, 工作区) = 工作区色   → 黑色"透明化"
+        screen(255白, 任意) = 255       → 白字保留 */
+html body .canvasWrapper {
+  filter:         none !important;
+  mix-blend-mode: screen !important;
+  opacity:        1 !important;
+}
+
+/* ── 4. ★ .page：偏亮蓝灰玻璃底板
+   canvas 黑色（白底透明化后）会显示这层颜色，不再是暗工作区直透。
+   alpha 越大颜色越主导，alpha 越小工作区越透出。              */
+html body .pdfViewer .page,
+html body .pdf-page {
+  background:    rgba(120, 140, 195, 0.35) !important;  /* ★ 调这个 */
+  border-radius: 6px !important;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.30),
+    0 2px  6px rgba(0, 0, 0, 0.18) !important;
+  margin-bottom: 20px !important;
+  overflow:      hidden !important;
+}
+
+/* ── 5. 工具栏底部细线（如果工具栏可见）──────────────────── */
+html body .pdf-toolbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── 6. textLayer 还原默认（透明，仅供选中拷贝）────────────
+   现在文字由 canvas 直接渲染白字，textLayer 不需要可见。   */
+html body .pdfViewer .page .textLayer span,
+html body .pdfViewer .page .textLayer .textLayerNode,
+html body .pdfViewer .page .textLayer br {
+  color:                   transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 选择高亮颜色 */
+html body .pdfViewer .page .textLayer ::selection {
+  background: rgba(120, 145, 210, 0.45) !important;
+  color:      transparent !important;
+}

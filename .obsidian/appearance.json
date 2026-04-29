@@ -3,6 +3,8 @@
   "accentColor": "",
   "cssTheme": "Minimal",
   "enabledCssSnippets": [
-    "flowing-bg"
+    "flowing-bg",
+    "pdf-frosted",
+    "red-butterfly"
   ]
 }

@@ -26,3 +26,6 @@ desktop.ini
 .obsidian/plugins/text-extractor/cache/
 .smart-env/multi/
 .smart-env/event_logs/
+
+/.quarto/
+**/*.quarto_ipynb

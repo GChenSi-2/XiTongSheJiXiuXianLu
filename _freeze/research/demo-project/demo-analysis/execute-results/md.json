@@ -1,0 +1,12 @@
+{
+  "hash": "2f4b7ddde2df922406525667e1578f06",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"三工具联动 Demo：数据分析示例\"\nauthor: \"研究者\"\ndate: today\nformat:\n  gfm:\n    toc: true\njupyter: python3\nexecute:\n  echo: true\n  warning: false\n---\n\n## 概述\n\n这是一个演示 **Obsidian × Jupyter × Quarto** 联动的示例文档。\n\n- 在 **JupyterLab** 里运行代码\n- 用 **Quarto** 渲染成 Markdown\n- 在 **Obsidian** 里查看结果和笔记\n\n---\n\n## 基础数据分析\n\n::: {.cell execution_count=1}\n``` {.python .cell-code}\nimport statistics\n\n# 模拟一组实验数据\ndata = [23, 45, 12, 67, 34, 89, 56, 78, 42, 31]\n\nprint(f\"样本数量：{len(data)}\")\nprint(f\"均值：{statistics.mean(data):.2f}\")\nprint(f\"中位数：{statistics.median(data)}\")\nprint(f\"标准差：{statistics.stdev(data):.2f}\")\nprint(f\"最大值：{max(data)}\")\nprint(f\"最小值：{min(data)}\")\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n样本数量：10\n均值：47.70\n中位数：43.5\n标准差：24.62\n最大值：89\n最小值：12\n```\n:::\n:::\n\n\n---\n\n## 数据处理示例\n\n::: {.cell execution_count=2}\n``` {.python .cell-code}\n# 数据排序和分组\nsorted_data = sorted(data)\nlow  = [x for x in sorted_data if x < 40]\nmid  = [x for x in sorted_data if 40 <= x < 70]\nhigh = [x for x in sorted_data if x >= 70]\n\nprint(\"低值组（<40）：\", low)\nprint(\"中值组（40-70）：\", mid)\nprint(\"高值组（≥70）：\", high)\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n低值组（<40）： [12, 23, 31, 34]\n中值组（40-70）： [42, 45, 56, 67]\n高值组（≥70）： [78, 89]\n```\n:::\n:::\n\n\n---\n\n## 结论\n\n::: {.cell execution_count=3}\n``` {.python .cell-code}\n# 汇总表格\ngroups = {\"低值（<40）\": low, \"中值（40-70）\": mid, \"高值（≥70）\": high}\nprint(f\"{'分组':<12} {'数量':>6} {'均值':>8}\")\nprint(\"-\" * 28)\nfor name, grp in groups.items():\n    mean = round(statistics.mean(grp), 1) if grp else \"N/A\"\n    print(f\"{name:<12} {len(grp):>6} {str(mean):>8}\")\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n分组               数量       均值\n----------------------------\n低值（<40）           4       25\n中值（40-70）         4     52.5\n高值（≥70）           2     83.5\n```\n:::\n:::\n\n\n> 本文档由 Quarto 渲染，结果自动同步到 Obsidian vault。\n\n",
+    "supporting": [
+      "demo-analysis_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

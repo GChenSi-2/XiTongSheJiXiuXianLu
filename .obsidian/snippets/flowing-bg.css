@@ -5,7 +5,7 @@ body::before {
   content: "";
   position: fixed;
   inset: -30%;
-  z-index: 0;
+  z-index: -2;       /* 最底层（在蝴蝶 z-index: -1 之下）*/
   pointer-events: none;
   /* will-change + translateZ(0) 强制浏览器为此元素分配独立 GPU 图层 */
   will-change: transform;
@@ -27,9 +27,9 @@ body::before {
   100% { transform: translate3d(4%, 3%, 0)     scale(1.03) rotate(-0.5deg); }
 }
 
-/* 2. body 底色 */
+/* 2. body 底色（提亮版：影响整个工作区透出底色，含 PDF）*/
 body {
-  background-color: #1a1d25 !important;
+  background-color: #252a35 !important;
 }
 
 /* 3. 中间容器全部透明,让渐变透上来 */

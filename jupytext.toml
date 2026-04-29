@@ -1,0 +1,7 @@
+# Jupytext 配置文件
+# 位置：vault 根目录
+# 作用：让 .ipynb 和 .md 自动双向同步
+
+[formats]
+# MyST Markdown 格式对 Obsidian 最友好
+notebook = "ipynb,myst"

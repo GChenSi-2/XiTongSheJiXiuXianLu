@@ -23,7 +23,7 @@ const coords = useAnchorPosition(anchorRef, floatRef, visible, offset);
 
 - `{ left, top }` —— 浮层应该被放在视口的哪个像素位置(因为 `position: fixed`,坐标基于视口)
 
-### 1.2 核心算法
+### 1.2 核心算法我没看到
 
 1. 测量 anchor 在视口里的位置(用 `getBoundingClientRect`)
 2. 测量 float 自身的尺寸
