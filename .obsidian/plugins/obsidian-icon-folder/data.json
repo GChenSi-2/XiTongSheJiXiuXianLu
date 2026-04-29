@@ -42,6 +42,7 @@
   "知识管理": "LiBrain",
   "知识管理/笔记系统.md": "LiNotebookPen",
   "知识管理/attachments": "LiPaperclip",
+  "知识管理/Obsidian PDF 磨砂背景定制笔记.md": "LiSparkles",
   "Excalidraw": "LiPalette",
   "attachments": "LiPaperclip",
   "提示词.md": "LiLightbulb",
@@ -59,5 +60,11 @@
   "getBoundingClientRect.md": "LiRuler",
   "React Portal.md": "LiLayers",
   "组件拆分 - 容器组件与展示组件.md": "LiBox",
-  "Tooltip 组件拆分设计.md": "LiPenBox"
+  "Tooltip 组件拆分设计.md": "LiPenBox",
+  "Git 版本管理指南.md": "LiGit2",
+  "知识管理/研究工作流": "LiFlaskConical",
+  "知识管理/研究工作流/Obsidian-Jupyter-Quarto 联动指南.md": "LiLink",
+  "research": "LiFlaskConical",
+  "research/demo-project/demo-analysis.qmd": "LiFileCode",
+  "_output": "LiFolderOutput"
 }
