@@ -1,12 +1,12 @@
 @echo off
 chcp 65001 >nul
 REM ==================================================================
-REM Launch JupyterLab via Miniconda3 base (FORCED - absolute path)
+REM Launch JupyterLab via anaconda3 base (FORCED - absolute path)
 REM root_dir = C:\Users\user\Desktop\operation system
 REM ==================================================================
 
 REM ---- 1. Activate conda base ----
-call "C:\Users\user\miniconda3\Scripts\activate.bat" base
+call "C:\Users\user\anaconda3\Scripts\activate.bat" base
 if errorlevel 1 (
     echo.
     echo [ERROR] Failed to activate conda base.

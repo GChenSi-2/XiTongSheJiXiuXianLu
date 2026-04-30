@@ -72117,6 +72117,7 @@ function getAcpMethodCandidates(logicalMethod, overrides) {
 }
 
 // src/providers/acp/AcpClientConnection.ts
+var ACP_PROMPT_TURN_TIMEOUT_MS = 0;
 var AcpClientConnection = class {
   constructor(options) {
     this.options = options;
@@ -72182,7 +72183,9 @@ var AcpClientConnection = class {
     return this.requestWithFallback("listSessions", request);
   }
   prompt(request) {
-    return this.requestWithFallback("prompt", request);
+    return this.requestWithFallback("prompt", request, {
+      timeoutMs: ACP_PROMPT_TURN_TIMEOUT_MS
+    });
   }
   cancel(notification) {
     this.notifyLogicalMethod("cancel", notification, { sendAllCandidatesIfUncached: true });
@@ -72284,16 +72287,16 @@ var AcpClientConnection = class {
   }
   // -32601 (Method not found) is the only error we absorb; agents that advertise legacy
   // method names only reject unknown candidates with it, so every other code is real.
-  async requestWithFallback(logicalMethod, params) {
+  async requestWithFallback(logicalMethod, params, requestOptions) {
     const cachedMethod = this.methodCache.get(logicalMethod);
     if (cachedMethod) {
-      return this.options.transport.request(cachedMethod, params);
+      return this.options.transport.request(cachedMethod, params, requestOptions);
     }
     const candidates = getAcpMethodCandidates(logicalMethod, this.options.methodOverrides);
     let lastError = null;
     for (const methodName of candidates) {
       try {
-        const result = await this.options.transport.request(methodName, params);
+        const result = await this.options.transport.request(methodName, params, requestOptions);
         this.methodCache.set(logicalMethod, methodName);
         return result;
       } catch (error48) {
@@ -76693,10 +76696,6 @@ function createThinkingBlock(parentEl, renderContent) {
   setupCollapsible(wrapperEl, header, contentEl, state);
   return state;
 }
-async function appendThinkingContent(state, content, renderContent) {
-  state.content += content;
-  await renderContent(state.contentEl, state.content);
-}
 function finalizeThinkingBlock(state) {
   if (state.timerInterval) {
     clearInterval(state.timerInterval);
@@ -80056,7 +80055,7 @@ var InputController = class {
           wasInterrupted = true;
           break;
         }
-        if (this.handleProviderMessageBoundaryChunk(chunk)) {
+        if (await this.handleProviderMessageBoundaryChunk(chunk)) {
           continue;
         }
         await streamController.handleStreamChunk(
@@ -80103,8 +80102,8 @@ var InputController = class {
           }
         }
         state.currentContentEl = null;
-        streamController.finalizeCurrentThinkingBlock(finalAssistantMsg);
-        streamController.finalizeCurrentTextBlock(finalAssistantMsg);
+        await streamController.finalizeCurrentThinkingBlock(finalAssistantMsg);
+        await streamController.finalizeCurrentTextBlock(finalAssistantMsg);
         this.deps.getSubagentManager().resetStreamingState();
         if (state.currentTodos && state.currentTodos.every((t2) => t2.status === "completed")) {
           state.currentTodos = null;
@@ -80427,19 +80426,19 @@ var InputController = class {
     this.sawInitialProviderUserMessage = false;
     this.awaitingProviderAssistantStart = false;
   }
-  handleProviderMessageBoundaryChunk(chunk) {
+  async handleProviderMessageBoundaryChunk(chunk) {
     switch (chunk.type) {
       case "user_message_start":
-        this.handleProviderUserMessageStart(chunk);
+        await this.handleProviderUserMessageStart(chunk);
         return true;
       case "assistant_message_start":
-        this.handleProviderAssistantMessageStart();
+        await this.handleProviderAssistantMessageStart();
         return true;
       default:
         return false;
     }
   }
-  handleProviderUserMessageStart(chunk) {
+  async handleProviderUserMessageStart(chunk) {
     var _a3, _b2, _c;
     const expected = this.pendingProviderUserMessages.shift();
     if (!this.sawInitialProviderUserMessage) {
@@ -80454,8 +80453,8 @@ var InputController = class {
       if (shouldDiscardPlaceholder) {
         this.discardStreamingAssistantMessage(previousAssistant.id);
       } else {
-        this.deps.streamController.finalizeCurrentThinkingBlock(previousAssistant);
-        this.deps.streamController.finalizeCurrentTextBlock(previousAssistant);
+        await this.deps.streamController.finalizeCurrentThinkingBlock(previousAssistant);
+        await this.deps.streamController.finalizeCurrentTextBlock(previousAssistant);
       }
     }
     this.deps.streamController.hideThinkingIndicator();
@@ -80490,15 +80489,15 @@ var InputController = class {
     this.deps.state.responseStartTime = performance.now();
     this.awaitingProviderAssistantStart = true;
   }
-  handleProviderAssistantMessageStart() {
+  async handleProviderAssistantMessageStart() {
     if (this.awaitingProviderAssistantStart) {
       this.awaitingProviderAssistantStart = false;
       return;
     }
     const previousAssistant = this.activeStreamingAssistantMessage;
     if (previousAssistant) {
-      this.deps.streamController.finalizeCurrentThinkingBlock(previousAssistant);
-      this.deps.streamController.finalizeCurrentTextBlock(previousAssistant);
+      await this.deps.streamController.finalizeCurrentThinkingBlock(previousAssistant);
+      await this.deps.streamController.finalizeCurrentTextBlock(previousAssistant);
     }
     const assistantMessage = {
       id: this.deps.generateId(),
@@ -81497,6 +81496,27 @@ function parseTodoInput(input) {
   return validTodos.length > 0 ? validTodos : null;
 }
 
+// src/utils/animationFrame.ts
+function scheduleAnimationFrame(callback) {
+  if (typeof globalThis.requestAnimationFrame === "function") {
+    return {
+      kind: "raf",
+      id: globalThis.requestAnimationFrame(() => callback())
+    };
+  }
+  return {
+    kind: "timeout",
+    id: globalThis.setTimeout(callback, 16)
+  };
+}
+function cancelScheduledAnimationFrame(frame) {
+  if (frame.kind === "raf" && typeof globalThis.cancelAnimationFrame === "function") {
+    globalThis.cancelAnimationFrame(frame.id);
+    return;
+  }
+  globalThis.clearTimeout(frame.id);
+}
+
 // src/features/chat/controllers/StreamController.ts
 init_path();
 
@@ -82155,6 +82175,16 @@ function renderStoredWriteEdit(parentEl, toolCall) {
 var _StreamController = class _StreamController {
   // agentId → spawn callId
   constructor(deps) {
+    this.pendingTextRenderFrame = null;
+    this.pendingTextRenderPromise = null;
+    this.resolvePendingTextRender = null;
+    this.isTextRenderRunning = false;
+    this.pendingThinkingRenderFrame = null;
+    this.pendingThinkingRenderPromise = null;
+    this.resolvePendingThinkingRender = null;
+    this.isThinkingRenderRunning = false;
+    this.pendingToolOutputFrames = /* @__PURE__ */ new Map();
+    this.pendingScrollFrame = null;
     // Provider lifecycle agent tracking (spawn → wait/close lifecycle)
     this.lifecycleSubagentStates = /* @__PURE__ */ new Map();
     // spawn callId → SubagentState
@@ -82181,23 +82211,23 @@ var _StreamController = class _StreamController {
       case "thinking":
         this.flushPendingTools();
         if (state.currentTextEl) {
-          this.finalizeCurrentTextBlock(msg);
+          await this.finalizeCurrentTextBlock(msg);
         }
         await this.appendThinking(chunk.content);
         break;
       case "text":
         this.flushPendingTools();
         if (state.currentThinkingState) {
-          this.finalizeCurrentThinkingBlock(msg);
+          await this.finalizeCurrentThinkingBlock(msg);
         }
         msg.content += chunk.content;
         await this.appendText(chunk.content);
         break;
       case "tool_use": {
         if (state.currentThinkingState) {
-          this.finalizeCurrentThinkingBlock(msg);
+          await this.finalizeCurrentThinkingBlock(msg);
         }
-        this.finalizeCurrentTextBlock(msg);
+        await this.finalizeCurrentTextBlock(msg);
         if (isSubagentToolName(chunk.name)) {
           this.flushPendingTools();
           this.handleTaskToolUseViaManager(chunk, msg);
@@ -82248,9 +82278,9 @@ var _StreamController = class _StreamController {
       case "context_compacted": {
         this.flushPendingTools();
         if (state.currentThinkingState) {
-          this.finalizeCurrentThinkingBlock(msg);
+          await this.finalizeCurrentThinkingBlock(msg);
         }
-        this.finalizeCurrentTextBlock(msg);
+        await this.finalizeCurrentTextBlock(msg);
         msg.contentBlocks = msg.contentBlocks || [];
         msg.contentBlocks.push({ type: "context_compacted" });
         this.renderCompactBoundary();
@@ -82406,7 +82436,7 @@ var _StreamController = class _StreamController {
       return;
     }
     existingToolCall.result = ((_b2 = existingToolCall.result) != null ? _b2 : "") + chunk.content;
-    updateToolCallResult(chunk.id, existingToolCall, state.toolCallElements);
+    this.scheduleToolOutputRender(chunk.id, existingToolCall);
     this.showThinkingIndicator();
   }
   // ============================================
@@ -82563,6 +82593,7 @@ var _StreamController = class _StreamController {
         }
         finalizeWriteEditBlock(writeEditState, chunk.isError || isBlocked);
       } else {
+        this.cancelPendingToolOutputRender(chunk.id);
         updateToolCallResult(chunk.id, existingToolCall, state.toolCallElements);
       }
       if (!chunk.isError && !isBlocked && isEditTool(existingToolCall.name)) {
@@ -82578,7 +82609,7 @@ var _StreamController = class _StreamController {
   // Text Block Management
   // ============================================
   async appendText(text) {
-    const { state, renderer } = this.deps;
+    const { state } = this.deps;
     if (!state.currentContentEl) return;
     this.hideThinkingIndicator();
     if (!state.currentTextEl) {
@@ -82586,10 +82617,11 @@ var _StreamController = class _StreamController {
       state.currentTextContent = "";
     }
     state.currentTextContent += text;
-    await renderer.renderContent(state.currentTextEl, state.currentTextContent);
+    void this.scheduleCurrentTextRender();
   }
-  finalizeCurrentTextBlock(msg) {
+  async finalizeCurrentTextBlock(msg) {
     const { state, renderer } = this.deps;
+    await this.flushPendingTextRender();
     if (msg && state.currentTextContent) {
       msg.contentBlocks = msg.contentBlocks || [];
       msg.contentBlocks.push({ type: "text", content: state.currentTextContent });
@@ -82599,6 +82631,88 @@ var _StreamController = class _StreamController {
     }
     state.currentTextEl = null;
     state.currentTextContent = "";
+  }
+  scheduleCurrentTextRender() {
+    if (!this.pendingTextRenderPromise) {
+      this.pendingTextRenderPromise = new Promise((resolve8) => {
+        this.resolvePendingTextRender = resolve8;
+      });
+    }
+    if (this.pendingTextRenderFrame === null && !this.isTextRenderRunning) {
+      this.pendingTextRenderFrame = scheduleAnimationFrame(() => {
+        this.pendingTextRenderFrame = null;
+        void this.renderPendingText();
+      });
+    }
+    return this.pendingTextRenderPromise;
+  }
+  async flushPendingTextRender() {
+    const pendingRender = this.pendingTextRenderPromise;
+    if (!pendingRender) return;
+    if (this.pendingTextRenderFrame !== null) {
+      cancelScheduledAnimationFrame(this.pendingTextRenderFrame);
+      this.pendingTextRenderFrame = null;
+      void this.renderPendingText();
+    }
+    await pendingRender;
+  }
+  async renderPendingText() {
+    if (this.isTextRenderRunning) return;
+    this.isTextRenderRunning = true;
+    const { state, renderer } = this.deps;
+    const textEl = state.currentTextEl;
+    const content = state.currentTextContent;
+    try {
+      if (textEl) {
+        await renderer.renderContent(textEl, content);
+        this.scrollToBottom();
+      }
+    } catch (e2) {
+    } finally {
+      this.isTextRenderRunning = false;
+    }
+    if (state.currentTextEl === textEl && state.currentTextContent !== content) {
+      this.pendingTextRenderFrame = scheduleAnimationFrame(() => {
+        this.pendingTextRenderFrame = null;
+        void this.renderPendingText();
+      });
+      return;
+    }
+    const resolve8 = this.resolvePendingTextRender;
+    this.pendingTextRenderPromise = null;
+    this.resolvePendingTextRender = null;
+    resolve8 == null ? void 0 : resolve8();
+  }
+  cancelPendingTextRender() {
+    if (this.pendingTextRenderFrame !== null) {
+      cancelScheduledAnimationFrame(this.pendingTextRenderFrame);
+      this.pendingTextRenderFrame = null;
+    }
+    const resolve8 = this.resolvePendingTextRender;
+    this.pendingTextRenderPromise = null;
+    this.resolvePendingTextRender = null;
+    resolve8 == null ? void 0 : resolve8();
+  }
+  scheduleToolOutputRender(toolId, toolCall) {
+    if (this.pendingToolOutputFrames.has(toolId)) return;
+    const frame = scheduleAnimationFrame(() => {
+      this.pendingToolOutputFrames.delete(toolId);
+      updateToolCallResult(toolId, toolCall, this.deps.state.toolCallElements);
+      this.scrollToBottom();
+    });
+    this.pendingToolOutputFrames.set(toolId, frame);
+  }
+  cancelPendingToolOutputRender(toolId) {
+    const frame = this.pendingToolOutputFrames.get(toolId);
+    if (!frame) return;
+    cancelScheduledAnimationFrame(frame);
+    this.pendingToolOutputFrames.delete(toolId);
+  }
+  cancelPendingToolOutputRenders() {
+    for (const frame of this.pendingToolOutputFrames.values()) {
+      cancelScheduledAnimationFrame(frame);
+    }
+    this.pendingToolOutputFrames.clear();
   }
   // ============================================
   // Thinking Block Management
@@ -82613,11 +82727,13 @@ var _StreamController = class _StreamController {
         (el, md) => renderer.renderContent(el, md)
       );
     }
-    await appendThinkingContent(state.currentThinkingState, content, (el, md) => renderer.renderContent(el, md));
+    state.currentThinkingState.content += content;
+    void this.scheduleCurrentThinkingRender();
   }
-  finalizeCurrentThinkingBlock(msg) {
+  async finalizeCurrentThinkingBlock(msg) {
     const { state } = this.deps;
     if (!state.currentThinkingState) return;
+    await this.flushPendingThinkingRender();
     const durationSeconds = finalizeThinkingBlock(state.currentThinkingState);
     if (msg && state.currentThinkingState.content) {
       msg.contentBlocks = msg.contentBlocks || [];
@@ -82628,6 +82744,68 @@ var _StreamController = class _StreamController {
       });
     }
     state.currentThinkingState = null;
+  }
+  scheduleCurrentThinkingRender() {
+    if (!this.pendingThinkingRenderPromise) {
+      this.pendingThinkingRenderPromise = new Promise((resolve8) => {
+        this.resolvePendingThinkingRender = resolve8;
+      });
+    }
+    if (this.pendingThinkingRenderFrame === null && !this.isThinkingRenderRunning) {
+      this.pendingThinkingRenderFrame = scheduleAnimationFrame(() => {
+        this.pendingThinkingRenderFrame = null;
+        void this.renderPendingThinking();
+      });
+    }
+    return this.pendingThinkingRenderPromise;
+  }
+  async flushPendingThinkingRender() {
+    const pendingRender = this.pendingThinkingRenderPromise;
+    if (!pendingRender) return;
+    if (this.pendingThinkingRenderFrame !== null) {
+      cancelScheduledAnimationFrame(this.pendingThinkingRenderFrame);
+      this.pendingThinkingRenderFrame = null;
+      void this.renderPendingThinking();
+    }
+    await pendingRender;
+  }
+  async renderPendingThinking() {
+    var _a3;
+    if (this.isThinkingRenderRunning) return;
+    this.isThinkingRenderRunning = true;
+    const { state, renderer } = this.deps;
+    const thinkingState = state.currentThinkingState;
+    const content = (_a3 = thinkingState == null ? void 0 : thinkingState.content) != null ? _a3 : "";
+    try {
+      if (thinkingState) {
+        await renderer.renderContent(thinkingState.contentEl, content);
+        this.scrollToBottom();
+      }
+    } catch (e2) {
+    } finally {
+      this.isThinkingRenderRunning = false;
+    }
+    if (state.currentThinkingState === thinkingState && thinkingState && thinkingState.content !== content) {
+      this.pendingThinkingRenderFrame = scheduleAnimationFrame(() => {
+        this.pendingThinkingRenderFrame = null;
+        void this.renderPendingThinking();
+      });
+      return;
+    }
+    const resolve8 = this.resolvePendingThinkingRender;
+    this.pendingThinkingRenderPromise = null;
+    this.resolvePendingThinkingRender = null;
+    resolve8 == null ? void 0 : resolve8();
+  }
+  cancelPendingThinkingRender() {
+    if (this.pendingThinkingRenderFrame !== null) {
+      cancelScheduledAnimationFrame(this.pendingThinkingRenderFrame);
+      this.pendingThinkingRenderFrame = null;
+    }
+    const resolve8 = this.resolvePendingThinkingRender;
+    this.pendingThinkingRenderPromise = null;
+    this.resolvePendingThinkingRender = null;
+    resolve8 == null ? void 0 : resolve8();
   }
   // ============================================
   // Subagent Tool Handling (via SubagentManager)
@@ -83044,6 +83222,13 @@ var _StreamController = class _StreamController {
   }
   /** Scrolls messages to bottom if auto-scroll is enabled. */
   scrollToBottom() {
+    if (this.pendingScrollFrame !== null) return;
+    this.pendingScrollFrame = scheduleAnimationFrame(() => {
+      this.pendingScrollFrame = null;
+      this.applyScrollToBottom();
+    });
+  }
+  applyScrollToBottom() {
     var _a3;
     const { state, plugin } = this.deps;
     if (!((_a3 = plugin.settings.enableAutoScroll) != null ? _a3 : true)) return;
@@ -83051,8 +83236,17 @@ var _StreamController = class _StreamController {
     const messagesEl = this.deps.getMessagesEl();
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
+  cancelPendingScroll() {
+    if (this.pendingScrollFrame === null) return;
+    cancelScheduledAnimationFrame(this.pendingScrollFrame);
+    this.pendingScrollFrame = null;
+  }
   resetStreamingState() {
     const { state } = this.deps;
+    this.cancelPendingTextRender();
+    this.cancelPendingThinkingRender();
+    this.cancelPendingToolOutputRenders();
+    this.cancelPendingScroll();
     this.hideThinkingIndicator();
     state.currentContentEl = null;
     state.currentTextEl = null;
@@ -83794,7 +83988,9 @@ var _MessageRenderer = class _MessageRenderer {
           wrapper.appendChild(copyBtn);
         }
       });
-      processFileLinks(this.app, el);
+      if (processedMarkdown.includes("[[")) {
+        processFileLinks(this.app, el);
+      }
     } catch (e2) {
       el.createDiv({
         cls: "claudian-render-error",
@@ -87909,13 +88105,15 @@ var NavigationSidebar = class {
     this.messagesEl = messagesEl;
     this.scrollHandler = () => {
     };
+    this.pendingVisibilityFrame = null;
+    this.isVisible = null;
     this.container = this.parentEl.createDiv({ cls: "claudian-nav-sidebar" });
     this.topBtn = this.createButton("claudian-nav-btn-top", "chevrons-up", "Scroll to top");
     this.prevBtn = this.createButton("claudian-nav-btn-prev", "chevron-up", "Previous message");
     this.nextBtn = this.createButton("claudian-nav-btn-next", "chevron-down", "Next message");
     this.bottomBtn = this.createButton("claudian-nav-btn-bottom", "chevrons-down", "Scroll to bottom");
     this.setupEventListeners();
-    this.updateVisibility();
+    this.applyVisibility();
   }
   createButton(cls, icon, label) {
     const btn = this.container.createDiv({ cls: `claudian-nav-btn ${cls}` });
@@ -87940,8 +88138,17 @@ var NavigationSidebar = class {
    * Visible if content overflows.
    */
   updateVisibility() {
+    if (this.pendingVisibilityFrame !== null) return;
+    this.pendingVisibilityFrame = scheduleAnimationFrame(() => {
+      this.pendingVisibilityFrame = null;
+      this.applyVisibility();
+    });
+  }
+  applyVisibility() {
     const { scrollHeight, clientHeight } = this.messagesEl;
     const isScrollable = scrollHeight > clientHeight + 50;
+    if (this.isVisible === isScrollable) return;
+    this.isVisible = isScrollable;
     this.container.classList.toggle("visible", isScrollable);
   }
   /**
@@ -87971,6 +88178,10 @@ var NavigationSidebar = class {
     }
   }
   destroy() {
+    if (this.pendingVisibilityFrame !== null) {
+      cancelScheduledAnimationFrame(this.pendingVisibilityFrame);
+      this.pendingVisibilityFrame = null;
+    }
     this.messagesEl.removeEventListener("scroll", this.scrollHandler);
     this.container.remove();
   }

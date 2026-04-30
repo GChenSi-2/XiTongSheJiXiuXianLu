@@ -6,6 +6,8 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiNotebookPen",
+      "LiWrench",
       "LiPenBox",
       "LiBox",
       "LiLayers",
@@ -13,9 +15,7 @@
       "LiShieldCheck",
       "LiGraduationCap",
       "LiCpu",
-      "LiGitFork",
-      "LiBrain",
-      "LiNotebookPen"
+      "LiGitFork"
     ],
     "recentlyUsedIconsSize": 10,
     "rules": [],
@@ -67,5 +67,7 @@
   "知识管理/研究工作流/Obsidian-Jupyter-Quarto 联动指南.md": "LiLink",
   "research": "LiFlaskConical",
   "research/demo-project/demo-analysis.qmd": "LiFileCode",
-  "_output": "LiFolderOutput"
+  "_output": "LiFolderOutput",
+  "obsidian-jupyter-plugin-implementation.md": "LiWrench",
+  "obsidian-jupyter-plugin-design.md": "LiNotebookPen"
 }

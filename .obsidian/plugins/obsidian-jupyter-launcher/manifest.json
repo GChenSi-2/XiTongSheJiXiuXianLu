@@ -1,0 +1,9 @@
+{
+  "id": "obsidian-jupyter-launcher",
+  "name": "Jupyter Lab Launcher",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "一键通过 Anaconda 启动 Jupyter Lab，并在浏览器中打开当前活动笔记。",
+  "author": "Claudian",
+  "isDesktopOnly": true
+}

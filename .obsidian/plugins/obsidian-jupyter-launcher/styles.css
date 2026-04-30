@@ -1,0 +1,20 @@
+/* Jupyter Lab Launcher - status bar */
+
+.jupyter-launcher-status {
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+.jupyter-launcher-status.is-running {
+  color: var(--color-green);
+}
+
+.jupyter-launcher-status.is-stopped {
+  color: var(--text-muted);
+}
+
+.jupyter-launcher-status:hover {
+  background-color: var(--background-modifier-hover);
+}

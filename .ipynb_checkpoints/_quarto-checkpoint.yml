@@ -1,0 +1,26 @@
+# Quarto 项目配置文件
+# 位置：vault 根目录
+# 作用：统一管理所有 .qmd 文件的渲染行为
+
+project:
+  type: default
+  output-dir: _output        # 渲染结果存到 vault/_output/
+
+format:
+  # 主输出格式：GitHub Flavored Markdown（Obsidian 原生兼容）
+  gfm:
+    wrap: none
+    toc: true
+    toc-depth: 3
+
+execute:
+  freeze: auto               # 未修改的代码块不重新运行（加速渲染）
+  cache: true                # 缓存计算结果到 _freeze/ 文件夹
+  echo: true                 # 默认显示代码
+  warning: false             # 默认隐藏警告信息
+
+# 默认使用 Python（如需 R 改为 ir）
+jupyter: python3
+
+# 语言选项
+lang: zh                     # 中文
