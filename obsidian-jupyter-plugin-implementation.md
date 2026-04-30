@@ -47,8 +47,8 @@ manager.ensureRunning()  ──► 已运行？是 ─► 复用
 generateToken() / 找空闲端口
     │
     ▼
-_spawnJupyter()  ──► 直接 spawn jupyter.exe（干净）
-    │              ╲ 找不到 exe ─► cmd.exe /c "call activate.bat && jupyter.exe ..."
+_spawnJupyter()  ──► cmd.exe /c "call activate.bat && jupyter.exe ..."（默认，完整复刻 .bat）
+    │              ╲ 用户显式 jupyterExecutable / 关掉 useCondaActivate ─► 直接 spawn exe
     ▼
 轮询 /api 直到 200/401/403（最多 30s）
     │
@@ -109,42 +109,46 @@ isAlive(port) {
 
 **关键点**：`/api` 返回 401/403 也算 alive。因为我们没带 token 时 jupyter 会拒绝，但拒绝得回响应——能响应就说明服务在。如果只认 200，会把 "在跑但拒绝匿名访问" 误判成挂了。
 
-#### 4.3 启动方式：三选一中选了「直接 Spawn exe」
+#### 4.3 启动方式：默认走 `cmd.exe + activate.bat`
 
-设计文档建议照着 `.bat` 文件走——`call activate.bat` 然后 `jupyter.exe lab`。这条路最直观，但实现起来有三个问题：
+> ⚠️ 这一节经历过一次方向反转，详见 9.6「Anaconda Toolbox 消失之谜」。先讲现在的方案，再讲为什么这样选。
 
-1. **多一层 cmd.exe**：进程树变深，杀的时候要 `taskkill /t`
-2. **引号转义**：`spawn('cmd.exe', ['/c', cmdString])` 时，cmdString 里的路径（带空格）+ 参数（带 `=`）混合出非常微妙的转义需求
-3. **stderr 噪声**：activate.bat 自己有输出，混在 jupyter 的 stderr 里
+启动方式有三种候选，按当前代码的优先级排：
 
-所以我做了一个 **决策树**：
+| 优先级 | 触发条件 | 实现 | 用途 |
+|--------|---------|------|------|
+| 1 | `jupyterExecutable` 设了路径 | 直接 `spawn(exe, args)` | venv / pipx 等非 conda 用户 |
+| 2（默认） | `useCondaActivate=true` | `cmd.exe /c "call activate.bat env && jupyter.exe ..."` | 完整复刻 .bat |
+| 3 | `useCondaActivate=false` | 直接 `spawn(deriveJupyterExe(...), args)` | 高阶用户、追求启动速度 |
 
 ```javascript
 _spawnJupyter(settings, args, workDir) {
   const customExe = (settings.jupyterExecutable || '').trim();
 
-  // 优先级 1：用户显式指定的 exe 路径
+  // 优先级 1：用户显式指定 exe → 直接调用，不做 conda 激活
   if (customExe && fs.existsSync(customExe)) {
     return spawn(customExe, args, { cwd: workDir, windowsHide: true });
   }
 
-  // 优先级 2：从 condaActivatePath + condaEnv 推导出 exe 路径
-  const derived = this.deriveJupyterExe(settings);
-  if (fs.existsSync(derived)) {
-    return spawn(derived, args, { cwd: workDir, windowsHide: true });
+  // 优先级 2（默认）：cmd.exe + activate.bat
+  if (settings.useCondaActivate !== false) {
+    const fullCmd = `call "${activate}" "${env}" && jupyter.exe ${argStr}`;
+    return spawn('cmd.exe', ['/d', '/s', '/c', fullCmd], {
+      cwd: workDir, windowsHide: true, windowsVerbatimArguments: false,
+    });
   }
 
-  // 优先级 3（回退）：cmd.exe + activate.bat
-  const fullCmd = `call "${activate}" "${env}" && jupyter.exe ${argStr}`;
-  return spawn('cmd.exe', ['/d', '/s', '/c', fullCmd], {
-    cwd: workDir, windowsHide: true,
-  });
+  // 优先级 3：用户主动关掉 activate → 直接 spawn 推导路径
+  const derived = this.deriveJupyterExe(settings);
+  return spawn(derived, args, { cwd: workDir, windowsHide: true });
 }
 ```
 
-90% 的情况都会走优先级 2，干净地直接调用 exe，没有 shell 中间层。
+走 cmd.exe 的成本（多一层进程、stderr 多两行 conda 信息），换来的是 **CONDA_PREFIX / CONDA_DEFAULT_ENV / PATH 等环境变量被正确写入**——Anaconda Toolbox、Navigator、`nb_conda_kernels` 这些扩展的存在感都依赖这些变量。这是用 .bat 时本来就成立的事实，插件原本试图"优化掉"这一步，结果掉到坑里（见 9.6）。
 
-#### 4.4 路径推导：从 activate.bat 倒推 jupyter.exe
+#### 4.4 路径推导：从 activate.bat 倒推 jupyter.exe（仅用于优先级 3）
+
+只有用户**显式关掉** `useCondaActivate` 时才走推导路径。算法：
 
 ```
 condaActivatePath = C:\Users\user\anaconda3\Scripts\activate.bat
@@ -163,7 +167,7 @@ deriveJupyterExe(settings) {
 }
 ```
 
-为什么不直接调用 `jupyter.exe`（依赖 PATH）？因为 PATH 里可能有多个 Python 环境，调错环境会非常难排查。**绝对路径 = 显式 = 可调试**。
+注意：**默认路径下 cmd.exe 内部用的是裸 `jupyter.exe`，不是推导路径**——因为 activate.bat 已经把 conda 的 Scripts 目录加到 PATH 顶端，shell 解析就能命中正确的 exe，并且天然继承所有激活时设的环境变量。如果改用绝对路径调 exe，反而会绕过 PATH 注入，丢掉一部分激活效果。
 
 #### 4.5 启动参数
 
@@ -315,22 +319,59 @@ this.statusBarEl.addEventListener('click', () => {
 
 ### 九、踩坑记录
 
-#### 9.1 Windows 引号转义（cmd.exe 回退路径）
+#### 9.1 Windows 引号转义（cmd.exe 路径，必须 verbatim=true）
 
-走 cmd.exe 时，命令字符串需要嵌入活动 bat 路径（含空格）+ 多个 jupyter 参数。我的策略：
+> ⚠️ 这一节也踩过一次。最初版本写的是 `windowsVerbatimArguments: false`，结果在 4.3 默认改用 cmd.exe 路径后立刻翻车。先讲坑，再讲正确做法。
+
+**翻车现场**（DevTools 日志）：
+
+```
+[stderr] '\"C:\Users\user\anaconda3\Scripts\activate.bat\"' is not recognized as an internal or external command
+[exit] Jupyter exited (code=1)
+```
+
+cmd.exe 把 `\"C:\...\activate.bat\"` 整段当成可执行文件名去找，找不到所以报错。
+
+**根因**：用 `windowsVerbatimArguments: false`（Node 默认）时，Node 会把每个 argv 元素 escape 一次再喂给 CreateProcess。我精心构造的 `fullCmd` 里的 `"..."` 全被 Node 转写成了 `\"...\"`，但 cmd.exe **不认 C 风格的 `\"` 转义**——它眼里 `\` 是字面反斜杠、`"` 是引号定界符。两者一组合，整个引号语义就崩了。
+
+**正确做法**：cmd.exe 这条路必须 `windowsVerbatimArguments: true`，让 Node 不要 escape，由我们自己控制最终命令行：
 
 ```javascript
 const argStr = args
-  .map(a => /[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)
+  .map(a => /\s/.test(a) ? `"${a}"` : a)  // 只包空格参数；不需要 \" 转义
   .join(' ');
 const fullCmd = `call "${activate}" "${env}" && jupyter.exe ${argStr}`;
 
-spawn('cmd.exe', ['/d', '/s', '/c', fullCmd], { windowsVerbatimArguments: false });
+spawn('cmd.exe', ['/d', '/s', '/c', fullCmd], {
+  cwd: workDir,
+  windowsHide: true,
+  windowsVerbatimArguments: true,  // ← 关键
+});
 ```
 
-- `windowsVerbatimArguments: false`：让 Node 处理外层（把 `fullCmd` 作为 cmd.exe 的一个参数正确转义）
-- 内部参数自己加双引号 + 转义内嵌引号
-- `cmd /d /s /c "…"`：`/d` 跳过 AutoRun、`/s` 让 cmd 不剥离最外层引号
+verbatim=true 之后，Windows 看到的最终命令行是：
+
+```
+cmd.exe /d /s /c call "C:\...\activate.bat" "base" && jupyter.exe lab --port=8888 ...
+```
+
+`/c` 之后的部分就是普通 cmd 语法，引号成对、各司其职。
+
+**为什么 direct-exe 路径不需要 verbatim=true**：直接 spawn 一个 .exe 时，Node 的 escape 逻辑刚好匹配 Windows CRT 的 argv 解析规则（同样是 MSVCRT 那套），所以默认 escape 就是对的。**只有进 cmd.exe 这条 shell 路径时**，Node 的 escape 跟 cmd 的 parser 不兼容，才需要切到 verbatim。
+
+| 走的路径 | windowsVerbatimArguments |
+|---------|-------------------------|
+| 直接 spawn .exe（路径 1、3） | `false`（默认，让 Node 处理） |
+| 通过 cmd.exe 跑 shell（路径 2） | **`true`**（自己处理） |
+
+#### 9.1 ext: cmd.exe 引号规则补完
+
+为什么 verbatim 模式下 `argStr` 里的双引号 cmd 又能识别？因为它们没经过 Node 改写。Windows 命令行字符串里：
+
+- `"abc"` → cmd 看到一对引号，里面是字面量（即使包含空格）
+- `\"abc\"` → cmd 看到 `\` 和 `"` 各自是字面字符（cmd 无 `\` 转义概念）
+
+Node 的 escape 把第一种改成第二种，是为了保护 .exe 用 CRT 解析时的语义；但 cmd.exe 不用 CRT 那套，所以改写反而帮了倒忙。
 
 #### 9.2 workDir 末尾的反斜杠陷阱
 
@@ -384,6 +425,28 @@ for (let i = 0; i < maxRetries; i++) {
 ```
 
 注意：这里用 `isAlive` 当作 "端口被占用" 的判定，但更准确说是 "端口上有 HTTP 服务"。如果端口被非 HTTP 程序占用，`isAlive` 返回 `false`，我们会尝试 bind，然后 jupyter 自己会报 EADDRINUSE。这是已知不完美——但用 `net.createServer().listen()` 实际占一下来检测，又会引入「测了一下，松开端口的瞬间被别人抢了」的竞态。Trade-off 之下选了 HTTP 探测。
+
+#### 9.6 Anaconda Toolbox 消失之谜（默认启动方式反转）
+
+**现象**：用 [[通过anaconda启动JupyterLab.bat]] 启动的 Jupyter Lab 左侧带 Anaconda 工具栏（Anaconda Cloud / Toolbox 等面板），用插件启动的同一个 jupyter.exe 却没有这些面板。
+
+**初次诊断方向（错误）**：怀疑插件用了 miniconda / 调到了别的 python.exe。但插件确实是从同一个 `C:\Users\user\anaconda3\Scripts\jupyter.exe` 启的，绝对路径完全一致——这条路堵死了。
+
+**真正原因**：`.bat` 启动前先 `call activate.bat base`，这会做几件事插件没做的：
+
+| 激活做了 | 缺失的影响 |
+|----------|-----------|
+| 设置 `CONDA_PREFIX=C:\Users\user\anaconda3` | Toolbox 面板里 "当前环境" 的探测失败，UI 直接不显示 |
+| 设置 `CONDA_DEFAULT_ENV=base` | 同上 |
+| 设置 `CONDA_EXE`、`CONDA_PYTHON_EXE` | 部分扩展通过它们调 `conda` CLI，调不到就降级隐藏 |
+| `PATH` 头部插入 anaconda 的 5 个目录 | 扩展找不到 `anaconda.exe` / `conda.bat` 等周边可执行文件 |
+| 触发 conda activate.d 钩子（如果有） | 用户自定义初始化丢失 |
+
+直接 `spawn(jupyter.exe)` 时，Python 解释器自己当然知道自己在哪个 env（shebang 里写死了），所以 `import` 包不会出错。但**部分扩展面板会读 `os.environ.get('CONDA_DEFAULT_ENV')` 之类来决定要不要显示**——读不到就静默隐藏。
+
+**修复**：把默认路径从「直接 spawn exe」翻成「cmd.exe + activate.bat」，新增 `useCondaActivate` 开关（默认 true）让高阶用户回到旧行为。代价是多一层 cmd.exe 进程（之前在 4.6 里讲过，反正 `taskkill /t` 已经能搞定整棵树），换来 .bat 行为一致性。
+
+**教训**：写"包装层"的时候，**别为了清爽优化掉用户脚本里的"看似多余"的步骤**。activate.bat 看起来只是一个激活步骤，删掉只是让进程树短了一层，但它实际承担的是"完整搭出 conda 环境上下文"这个责任。包装的目标应该是「**把脚本的一切外部行为复刻一遍**」，不是「精简掉觉得没用的部分」。
 
 ### 十、与设计文档的对照
 

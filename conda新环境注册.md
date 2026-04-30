@@ -13,7 +13,7 @@ jupyter:
     name: ngs
 ---
 
-```python editable=true slideshow={"slide_type": ""}
+```python slideshow={"slide_type": ""} editable=true
 import sys
 print(sys.executable)
 ```

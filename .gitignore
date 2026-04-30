@@ -29,3 +29,6 @@ desktop.ini
 
 /.quarto/
 **/*.quarto_ipynb
+
+/.claudian/claudian-settings.json
+/.gitignore

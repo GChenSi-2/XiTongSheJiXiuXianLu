@@ -22,6 +22,10 @@ const DEFAULT_SETTINGS = {
   condaEnv: 'base',
   // 留空 = 自动从 conda 路径推导；填写则跳过推导
   jupyterExecutable: '',
+  // true（默认）= 通过 cmd.exe 先 call activate.bat 激活环境再启动 jupyter.exe
+  //               这样能完整保留 Anaconda 工具栏 / Navigator 等依赖 conda 环境变量的扩展。
+  // false = 直接 spawn 推导出来的 jupyter.exe，更快但 Anaconda 集成可能缺失。
+  useCondaActivate: true,
   port: 8888,
   portRetries: 5,
   // 留空 = 启动时随机生成
@@ -186,7 +190,7 @@ class JupyterManager {
   _spawnJupyter(settings, args, workDir) {
     const customExe = (settings.jupyterExecutable || '').trim();
     let cmd, cmdArgs, options;
-    let usedShell = false;
+    let label;
 
     const tryDirect = (exePath) => {
       if (!exePath) return false;
@@ -197,36 +201,51 @@ class JupyterManager {
       }
     };
 
+    // 优先级 1：用户显式指定 jupyterExecutable —— 跳过 conda 激活
+    // （venv / pipx / 非 conda 用户的逃生通道）
     if (customExe && tryDirect(customExe)) {
       cmd = customExe;
       cmdArgs = args;
       options = { cwd: workDir, windowsHide: true };
-      this.log('info', `Spawning (custom): ${cmd}`);
-    } else {
-      const derived = this.deriveJupyterExe(settings);
-      if (tryDirect(derived)) {
-        cmd = derived;
-        cmdArgs = args;
-        options = { cwd: workDir, windowsHide: true };
-        this.log('info', `Spawning (derived): ${cmd}`);
-      } else {
-        // 回退：cmd.exe /c "call activate.bat env && jupyter.exe lab ..."
-        const activate = settings.condaActivatePath;
-        const env = (settings.condaEnv || 'base').trim();
-        if (!activate) {
-          throw new Error('无法定位 jupyter.exe，且未配置 Conda activate.bat 路径。');
-        }
-        const argStr = args
-          .map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a))
-          .join(' ');
-        const fullCmd = `call "${activate}" "${env}" && jupyter.exe ${argStr}`;
-        cmd = 'cmd.exe';
-        cmdArgs = ['/d', '/s', '/c', fullCmd];
-        options = { cwd: workDir, windowsHide: true, windowsVerbatimArguments: false };
-        usedShell = true;
-        this.log('info', `Spawning (conda fallback): ${fullCmd}`);
+      label = 'custom-exe';
+    } else if (settings.useCondaActivate !== false) {
+      // 优先级 2（默认）：cmd.exe + activate.bat —— 完整复刻用户的 .bat
+      // 这一步会设置 CONDA_PREFIX / CONDA_DEFAULT_ENV / PATH 等环境变量，
+      // Anaconda Toolbox / Navigator 等 lab 扩展依赖这些才能加载。
+      const activate = settings.condaActivatePath;
+      const env = (settings.condaEnv || 'base').trim();
+      if (!activate || !tryDirect(activate)) {
+        throw new Error(`找不到 conda activate.bat：${activate || '(未设置)'}`);
       }
+      // 给 jupyter 参数中带空格的部分加双引号（cmd.exe 用双引号区分参数）。
+      // cmd 不认识 \" 这种 C 风格转义；好在我们的参数里不含字面量引号，
+      // 所以直接包一层就够了。
+      const argStr = args
+        .map((a) => (/\s/.test(a) ? `"${a}"` : a))
+        .join(' ');
+      // call 后接 activate.bat，再 && 连接 jupyter.exe；
+      // 不写绝对路径：activate 完成后 jupyter.exe 在 PATH 顶端
+      const fullCmd = `call "${activate}" "${env}" && jupyter.exe ${argStr}`;
+      cmd = 'cmd.exe';
+      cmdArgs = ['/d', '/s', '/c', fullCmd];
+      // verbatim=true 让 Node 不再 escape 参数 —— 否则 fullCmd 里的 " 会被改成 \"，
+      // cmd.exe 看到 \"path\" 这种东西会把它当成可执行文件名，找不到就报
+      // 「'\"...activate.bat\"' is not recognized」。
+      options = { cwd: workDir, windowsHide: true, windowsVerbatimArguments: true };
+      label = 'conda-activate';
+    } else {
+      // 优先级 3：用户主动关闭了 useCondaActivate —— 直接 spawn 推导路径
+      const derived = this.deriveJupyterExe(settings);
+      if (!tryDirect(derived)) {
+        throw new Error(`找不到 jupyter.exe：${derived || '(无法推导)'}`);
+      }
+      cmd = derived;
+      cmdArgs = args;
+      options = { cwd: workDir, windowsHide: true };
+      label = 'direct-exe';
     }
+
+    this.log('info', `Spawning [${label}]: ${cmd} ${(cmdArgs || []).join(' ')}`);
 
     let child;
     try {
@@ -247,7 +266,6 @@ class JupyterManager {
         this.plugin.updateStatus();
       }
     });
-    child._usedShell = usedShell;
     return child;
   }
 
@@ -327,8 +345,25 @@ class JupyterLauncherSettingTab extends obsidian.PluginSettingTab {
       );
 
     new obsidian.Setting(containerEl)
+      .setName('启动时执行 conda activate（推荐）')
+      .setDesc(
+        '开启（默认）：通过 cmd.exe 先 call activate.bat 激活环境，再启动 Jupyter Lab —— ' +
+        '完整保留 Anaconda 工具栏 / Navigator 等依赖 conda 环境变量的扩展，' +
+        '行为与「通过anaconda启动JupyterLab.bat」一致。' +
+        '关闭：直接 spawn 推导出来的 jupyter.exe，启动稍快但部分 Anaconda 集成可能缺失。'
+      )
+      .addToggle((t) =>
+        t
+          .setValue(this.plugin.settings.useCondaActivate !== false)
+          .onChange(async (val) => {
+            this.plugin.settings.useCondaActivate = val;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new obsidian.Setting(containerEl)
       .setName('jupyter.exe 自定义路径（可选）')
-      .setDesc('设置后跳过 conda 推导，直接使用该 exe。留空则按上面两项推导。')
+      .setDesc('设置后跳过 conda 激活与推导，直接使用该 exe（适合 venv / pipx 用户）。留空则按上面的 conda 设置走。')
       .addText((text) =>
         text
           .setPlaceholder('（留空 = 使用 conda 推导）')
