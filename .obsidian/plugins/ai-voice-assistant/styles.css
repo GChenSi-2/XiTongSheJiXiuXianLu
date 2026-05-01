@@ -1,0 +1,22 @@
+.ai-voice-assistant-modal textarea {
+  width: 100%;
+  min-height: 9rem;
+}
+
+.ai-voice-assistant-log {
+  max-height: 18rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.ai-voice-assistant-button-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+

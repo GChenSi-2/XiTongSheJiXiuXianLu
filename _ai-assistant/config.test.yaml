@@ -1,0 +1,47 @@
+vault_path: .
+hotkey:
+  mode: manual_cli
+  key: ctrl+alt+space
+voice:
+  stt_provider: openai
+  openai_stt_model: gpt-4o-mini-transcribe
+  faster_whisper_model: small
+  faster_whisper_device: auto
+  faster_whisper_compute_type: auto
+  language: zh
+  record_seconds: 6
+  sample_rate: 16000
+tts:
+  provider: edge-tts
+  edge_voice: zh-CN-XiaoxiaoNeural
+  fallback_provider: windows-sapi
+  play_audio: false
+execution:
+  mode: codex-cli
+  codex_command: C:/Users/user/AppData/Roaming/npm/codex.cmd
+  sandbox: workspace-write
+  approval_policy: never
+  skip_git_repo_check: true
+  timeout_seconds: 900
+  model: ''
+  require_confirmation_for_write: true
+  require_confirmation_for_delete: true
+  max_files_without_confirmation: 3
+summary:
+  provider: heuristic
+  openai_model: gpt-4o-mini
+  max_sentences: 2
+  max_chars: 120
+current_note:
+  state_file: _ai-assistant/current-note.json
+  fallback_path: React-CompoundComponents-模式笔记.md
+avatar:
+  enabled: true
+  mode: state-file
+  state_file: _ai-assistant/avatar/state.json
+logging:
+  enabled: true
+  action_log: _ai-assistant/logs/actions.jsonl
+server:
+  host: 127.0.0.1
+  port: 17345

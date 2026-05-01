@@ -24,7 +24,7 @@ tags:
 
 核心体验：
 
-> 按下快捷键，说一句话，AI 帮我操作 Obsidian，然后用一句话告诉我结果。
+> 点击 Obsidian 左侧麦克风，手动开始/停止录音，AI 帮我操作 Obsidian，然后用一句话告诉我结果。
 
 ---
 
@@ -84,7 +84,7 @@ Claudian / Codex 执行层
 
 | 模块   | 作用                | 推荐技术                     |
 | ---- | ----------------- | ------------------------ |
-| 语音输入 | 录制用户命令            | Python + 快捷键触发           |
+| 语音输入 | 录制用户命令            | Obsidian 控制面板 + Python InputStream |
 | STT  | 语音转文字             | OpenAI STT / faster-whisper，可配置切换 |
 | 命令路由 | 判断用户要做什么          | LLM prompt / 规则优先        |
 | 执行层  | 操作 Obsidian vault | Claudian 或 Codex CLI     |
@@ -96,9 +96,11 @@ Claudian / Codex 执行层
 
 ## 4. 推荐实现路线
 
-## 4.1 MVP：语音命令 + Codex 执行 + TTS 总结
+## 4.1 MVP v0.2：常驻进程 + 手动录音控制 + Codex 执行 + TTS 总结
 
-第一阶段不强求复杂虚拟形象，先实现：
+第一阶段不强求复杂虚拟形象，先实现稳定且低延迟的语音命令闭环。
+
+v0.1 的固定时长录音流程是：
 
 ```text
 快捷键触发
@@ -109,6 +111,22 @@ Claudian / Codex 执行层
   → 播放语音
 ```
 
+v0.2 改为更适合日常使用的常驻进程流程：
+
+```text
+Obsidian 插件加载
+  → 启动一次常驻 Python HTTP server
+  → 用户打开 AI 语音助手控制面板
+  → 点击“开始录音”
+  → 说完后点击“停止并识别”
+  → 检查/编辑转写文本
+  → 点击“执行文本”或 “Dry run 执行文本”
+  → Codex 执行
+  → TTS 简短播报结果
+```
+
+这样避免每次命令都重新启动 Python，也避免固定 6 秒录音过短或过长。
+
 ### 推荐技术栈
 
 | 功能    | 推荐                                |
@@ -117,6 +135,8 @@ Claudian / Codex 执行层
 | 语音识别  | OpenAI STT 优先，faster-whisper 本地备用 |
 | 语音合成  | edge-tts                          |
 | AI 执行 | Codex CLI，工作目录设为当前 vault          |
+| 常驻服务  | Python `ThreadingHTTPServer`，监听 `127.0.0.1:17345` |
+| 录音控制  | `sounddevice.InputStream`，由 UI 手动 start/stop |
 | 日志    | Markdown / JSONL                  |
 | 状态显示  | 控制台或简单 Obsidian 状态文件              |
 
@@ -200,17 +220,22 @@ _ai-assistant/
 vault_path: "."
 
 hotkey:
-  mode: "push_to_talk"
-  key: "ctrl+alt+space"
+  mode: "obsidian_panel"
+  key: "command_palette_or_ribbon"
 
 voice:
   stt_provider: "openai"
   openai_stt_model: "gpt-4o-mini-transcribe"
   faster_whisper_model: "small"
   language: "zh"
+  record_seconds: 6 # 仅旧 CLI 固定时长流程使用；v0.2 控制面板不依赖它
   tts: "edge-tts"
   tts_voice: "zh-CN-XiaoxiaoNeural"
   summary_max_sentences: 2
+
+server:
+  host: "127.0.0.1"
+  port: 17345
 
 execution:
   mode: "codex-cli"
@@ -403,20 +428,24 @@ logging:
 
 ---
 
-## 11. MVP 执行流程
+## 11. MVP v0.2 执行流程
 
 ```text
-1. 用户按下 Ctrl + Alt + Space
-2. 助手状态变为 listening
-3. 用户说：“总结当前笔记”
-4. 录音结束
-5. STT 输出：“总结当前笔记”
-6. 命令路由器识别 intent
-7. 助手状态变为 thinking
-8. Codex 在 vault 中执行任务
-9. 助手状态变为 speaking
-10. TTS 播报：“已完成。我帮你总结了当前笔记，并在文末添加了重点摘要。”
-11. 助手状态回到 idle
+1. Obsidian 插件加载，并自动启动常驻 Python server
+2. 用户点击左侧麦克风，打开“AI 语音助手控制面板”
+3. 用户点击“开始录音”
+4. 助手状态变为 listening
+5. 用户说：“总结当前笔记”
+6. 用户点击“停止并识别”
+7. STT 输出：“总结当前笔记”
+8. 用户检查/编辑转写文本
+9. 用户点击“执行文本”
+10. 命令路由 / 风险判断，必要时弹出确认
+11. 助手状态变为 thinking / executing
+12. Codex 在 vault 中执行任务
+13. 助手状态变为 speaking
+14. TTS 播报：“已完成。我帮你总结了当前笔记，并在文末添加了重点摘要。”
+15. 助手状态变为 done / idle
 ```
 
 ---
@@ -487,6 +516,24 @@ stt_provider: faster-whisper → 使用本地 faster-whisper
 说话时显示“正在听”
 执行时显示“正在思考”
 完成后显示“已完成”
+```
+
+## 阶段 4.5：常驻进程和手动录音控制
+
+目标：
+
+- 插件加载后启动一次常驻 Python server。
+- 左侧麦克风打开控制面板，而不是直接固定录音。
+- 用户可以手动点击“开始录音”和“停止并识别”。
+- 转写结果可在 UI 中编辑后再执行。
+
+验收标准：
+
+```text
+点击麦克风 → 打开控制面板
+点击开始录音 → state=listening
+点击停止并识别 → 出现转写文本
+点击执行文本 → Codex 执行并 TTS 总结
 ```
 
 ## 阶段 5：Live2D / 桌面形象
@@ -564,27 +611,30 @@ _ai-assistant/current-selection.md
 
 ## 14. 推荐下一步
 
-建议下一步先实现以下最小闭环：
+当前 v0.2 已经实现基础闭环。下一步建议集中在体验层：
 
 ```text
-录音 → OpenAI STT 识别 → Edge TTS 播报
+Obsidian 控制面板 → 手动录音 → OpenAI STT → Codex → Edge TTS
 ```
 
-同时保留一个可切换的本地备用链路：
+继续保留一个可切换的本地备用链路：
 
 ```text
-录音 → faster-whisper 识别 → Edge TTS 播报
+手动录音 → faster-whisper 识别 → Edge TTS 播报
 ```
 
-完成后再接入：
+后续优先改进：
 
 ```text
-识别文本 → Codex 执行 → 简短语音总结
+- 更好的 Obsidian 侧边栏虚拟形象
+- STT 后的命令纠错/规范化
+- 更精准的风险判断，减少误弹确认
+- 真正的 push-to-talk 快捷键
 ```
 
-最小原型目标：
+当前可用目标：
 
-> 在当前 vault 中运行一个 Python 脚本，按快捷键说“总结当前笔记”，AI 完成操作并用中文说“已完成”。
+> 在 Obsidian 中点击麦克风，手动开始/停止录音，AI 完成当前 vault 操作并用中文简短播报结果。
 
 ---
 
@@ -593,8 +643,88 @@ _ai-assistant/current-selection.md
 | 决策 | 选择 | 原因 |
 |---|---|---|
 | 第一阶段形象 | 简单状态面板 | 降低复杂度 |
-| 第一阶段语音触发 | 快捷键 | 比唤醒词稳定 |
+| 第一阶段语音触发 | Obsidian 控制面板手动开始/停止 | 比固定秒数和唤醒词都更稳定 |
 | 第一阶段执行方式 | Codex CLI 优先 | 比自动控制 Claudian UI 更稳定 |
 | 第一阶段 STT | OpenAI STT 默认，faster-whisper 备用 | 避免本地 Whisper 环境失败卡住 MVP |
+| v0.2 性能策略 | 常驻 Python HTTP server | 避免每次语音命令都冷启动 Python |
+| v0.2 录音策略 | `sounddevice.InputStream` | 支持 UI 手动开始/停止录音 |
 | 语音总结长度 | 1-2 句 | 避免打断思考 |
 | 高风险操作 | 必须确认 | 防止误删和误改 |
+
+---
+
+## 16. 当前 MVP 实现记录
+
+已在 vault 根目录创建：
+
+```text
+_ai-assistant/
+  assistant.py
+  config.yaml
+  README.md
+  requirements.txt
+  requirements-whisper.txt
+  setup.cmd
+  voice.cmd
+  run-text.cmd
+  current-note.json
+  prompts/
+    command_router.md
+    execution_prompt.md
+    result_summarizer.md
+  avatar/
+    state.json
+  logs/
+    actions.jsonl
+    last-codex-message.md
+```
+
+并已创建 Obsidian 本地插件：
+
+```text
+.obsidian/plugins/ai-voice-assistant/
+  manifest.json
+  main.js
+  styles.css
+  data.json
+  README.md
+```
+
+当前实现支持：
+
+- OpenAI STT 与 faster-whisper 双后端配置。
+- Edge TTS，失败时可回退到 Windows SAPI。
+- Codex CLI 非交互执行。
+- 当前笔记通过 `_ai-assistant/current-note.json` 提供。
+- 高风险语音命令的命令行确认。
+- avatar 状态文件 `_ai-assistant/avatar/state.json`。
+- 操作日志 `_ai-assistant/logs/actions.jsonl`。
+- 已修正 Codex CLI 参数顺序：`--ask-for-approval` 必须放在 `exec` 子命令之前。
+- 已完成一次合成语音集成测试：TTS 生成语音命令 → OpenAI STT 转写 → Codex 执行只读任务 → TTS 生成成果总结。
+- Obsidian 插件入口：左侧麦克风按钮和命令面板命令会调用 `_ai-assistant/assistant.py`。
+- 插件会自动同步当前打开笔记到 `_ai-assistant/current-note.json`。
+- 插件已经加入 `.obsidian/community-plugins.json`，如未立刻显示，需要重启 Obsidian 或 `Ctrl+R` 重新加载窗口。
+- v0.2 已改为常驻 Python HTTP server：插件加载时启动一次，之后 UI 通过 `127.0.0.1:17345` 控制“开始录音 / 停止并识别 / 执行文本”。
+- 录音方式从固定秒数 `sounddevice.rec(seconds)` 改为 `sounddevice.InputStream`，由用户在 Obsidian 控制面板里手动决定结束时机。
+
+优先测试命令：
+
+```powershell
+python _ai-assistant\assistant.py run-text "总结当前笔记，不要覆盖原文，只在文末追加一个 AI 总结小节。"
+```
+
+旧的 CLI 固定时长语音流程仍保留，主要用于调试：
+
+```powershell
+python _ai-assistant\assistant.py voice --seconds 6
+```
+
+v0.2 推荐从 Obsidian 插件使用：
+
+```text
+点击左侧麦克风
+→ 启动/检查常驻进程
+→ 开始录音
+→ 停止并识别
+→ 执行文本
+```

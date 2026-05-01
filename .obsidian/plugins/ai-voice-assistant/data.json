@@ -1,0 +1,13 @@
+{
+  "pythonCommand": "python",
+  "assistantScript": "_ai-assistant/assistant.py",
+  "assistantConfig": "_ai-assistant/config.yaml",
+  "defaultRecordSeconds": 6,
+  "autoSyncCurrentNote": true,
+  "showProcessLogModal": true,
+  "dryRunByDefault": false,
+  "serverHost": "127.0.0.1",
+  "serverPort": 17345,
+  "autoStartServer": true,
+  "stopServerOnUnload": false
+}

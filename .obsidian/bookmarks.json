@@ -59,6 +59,21 @@
           "type": "file",
           "ctime": 1777613306063,
           "path": "obsidian-jupyter-plugin-design.md"
+        },
+        {
+          "type": "file",
+          "ctime": 1777624617613,
+          "path": "obsidian-jupyter-plugin-implementation.md"
+        },
+        {
+          "type": "file",
+          "ctime": 1777628023713,
+          "path": "AI虚拟形象语音助手设计.md"
+        },
+        {
+          "type": "file",
+          "ctime": 1777628041042,
+          "path": "AI语音助手实现笔记.md"
         }
       ],
       "title": "Obsidian customized plugin design"

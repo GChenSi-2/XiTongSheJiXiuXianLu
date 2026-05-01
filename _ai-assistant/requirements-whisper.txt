@@ -1,0 +1,4 @@
+# Optional local/offline STT backend.
+# Install this only if you want `voice.stt_provider: "faster-whisper"`.
+faster-whisper>=1.0.0
+
