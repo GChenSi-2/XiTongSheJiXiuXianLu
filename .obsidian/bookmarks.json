@@ -50,6 +50,18 @@
       "ctime": 1777488223238,
       "items": [],
       "title": "script&bash"
+    },
+    {
+      "type": "group",
+      "ctime": 1777613259982,
+      "items": [
+        {
+          "type": "file",
+          "ctime": 1777613306063,
+          "path": "obsidian-jupyter-plugin-design.md"
+        }
+      ],
+      "title": "Obsidian customized plugin design"
     }
   ]
 }
