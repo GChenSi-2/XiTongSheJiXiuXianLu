@@ -105,15 +105,15 @@ execvp(myargs[0], myargs);  // 之後的程式碼不會執行
 
 #### `wc p3.c > newfile.txt` 一步步發生什麼事
 
-| 步驟 | 動作 | child 的 fd 表 |
-|------|------|----------------|
-| 0 | shell 還沒動作 | `[0:鍵盤, 1:螢幕, 2:螢幕]` |
-| 1 | shell `fork()` 出 child（fd 表複製一份） | `[0:鍵盤, 1:螢幕, 2:螢幕]` |
-| 2 | child `close(STDOUT_FILENO)` | `[0:鍵盤, 1:✗空, 2:螢幕]` |
-| 3 | child `open("./newfile.txt", ...)` → 最小可用是 1 | `[0:鍵盤, 1:newfile.txt, 2:螢幕]` |
-| 4 | child `execvp("wc", ...)` — **程式碼換掉但 fd 表保留** | `[0:鍵盤, 1:newfile.txt, 2:螢幕]` |
-| 5 | `wc` 內部呼叫 `printf(...)` = 寫 fd=1 = **寫到 newfile.txt** | 同上 |
-| 6 | parent `wait()` 等 child 結束，印新 prompt（parent 的 fd=1 從未被動過） | — |
+| 步驟  | 動作                                                        | child 的 fd 表                  |
+| --- | --------------------------------------------------------- | ----------------------------- |
+| 0   | shell 還沒動作                                                | `[0:鍵盤, 1:螢幕, 2:螢幕]`          |
+| 1   | shell `fork()` 出 child（fd 表複製一份）                          | `[0:鍵盤, 1:螢幕, 2:螢幕]`          |
+| 2   | child `close(STDOUT_FILENO)`                              | `[0:鍵盤, 1:✗空, 2:螢幕]`          |
+| 3   | child `open("./newfile.txt", ...)` → 最小可用是 1              | `[0:鍵盤, 1:newfile.txt, 2:螢幕]` |
+| 4   | child `execvp("wc", ...)` — **程式碼換掉但 fd 表保留**             | `[0:鍵盤, 1:newfile.txt, 2:螢幕]` |
+| 5   | `wc` 內部呼叫 `printf(...)` = 寫 fd=1 = **寫到 newfile.txt**     | 同上                            |
+| 6   | parent `wait()` 等 child 結束，印新 prompt（parent 的 fd=1 從未被動過） | —                             |
 
 #### 為什麼這設計漂亮？
 - `wc` 原始碼 **一行都不用改**，卻能被外部重導向到任意檔案／pipe／網路。
