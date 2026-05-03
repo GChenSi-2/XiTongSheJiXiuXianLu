@@ -51,13 +51,13 @@
 
 ## 二、核心概念
 
-| 概念 | 解释 |
-|---|---|
-| **ACP** (Agent Client Protocol) | Zed 主推的协议，定义"agent 进程"和"宿主 IDE"之间怎么对话（消息、工具调用、权限）。Jupyter AI 是 ACP client，agent 是 ACP server。 |
-| **MCP** (Model Context Protocol) | Anthropic 主推的协议，定义"工具提供方"和"LLM"之间怎么对话。Jupyter AI 内置一个 MCP server 给 agent 使用。 |
-| **AI Persona** | Jupyter AI 里一个 agent 的呈现形式。安装哪个 agent CLI，就自动出现对应的 persona（@Claude、@Codex...）。 |
-| **Chat 文件** | 每个对话是一个文件存在 workspace 里，可以关掉再打开恢复，可以多人协作。 |
-| **权限系统** | agent 写文件、跑命令、调用 MCP 工具前，会弹窗让用户点确认。 |
+| 概念                               | 解释                                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| **ACP** (Agent Client Protocol)  | Zed 主推的协议，定义"agent 进程"和"宿主 IDE"之间怎么对话（消息、工具调用、权限）。Jupyter AI 是 ACP client，agent 是 ACP server。 |
+| **MCP** (Model Context Protocol) | Anthropic 主推的协议，定义"工具提供方"和"LLM"之间怎么对话。Jupyter AI 内置一个 MCP server 给 agent 使用。                  |
+| **AI Persona**                   | Jupyter AI 里一个 agent 的呈现形式。安装哪个 agent CLI，就自动出现对应的 persona（@Claude、@Codex...）。                |
+| **Chat 文件**                      | 每个对话是一个文件存在 workspace 里，可以关掉再打开恢复，可以多人协作。                                                     |
+| **权限系统**                         | agent 写文件、跑命令、调用 MCP 工具前，会弹窗让用户点确认。                                                           |
 
 **协议分工的本质**：
 - ACP 解决"谁是 agent"（可以换 Claude / Codex / Gemini）
@@ -70,11 +70,11 @@
 
 ### 3.1 选择安装位置
 
-| 选项 | 推荐度 | 理由 |
-|---|---|---|
-| 装在 base | ⭐⭐⭐ | 你的 JupyterLab 就在 base，jupyter-ai 是 Lab extension 必须跟 Lab 同环境 |
-| 装在 ngs | ❌ | ngs 是 kernel 环境，不跑 JupyterLab，装了没用 |
-| 单开 venv | ⭐⭐⭐⭐ | 最干净，但你得在新 venv 里重装 jupyterlab |
+| 选项      | 推荐度  | 理由                                                           |
+| ------- | ---- | ------------------------------------------------------------ |
+| 装在 base | ⭐⭐⭐  | 你的 JupyterLab 就在 base，jupyter-ai 是 Lab extension 必须跟 Lab 同环境 |
+| 装在 ngs  | ❌    | ngs 是 kernel 环境，不跑 JupyterLab，装了没用                           |
+| 单开 venv | ⭐⭐⭐⭐ | 最干净，但你得在新 venv 里重装 jupyterlab                                |
 
 **结论**：装到 `base`。jupyter-ai 必须跟 `jupyterlab` 在同一个 Python 环境，没有第二个选择。ngs kernel 不受影响——因为 jupyter-ai 操作 notebook 是通过 Jupyter server 的 API，最终落到哪个 kernel 由 notebook 自己决定。
 
@@ -197,14 +197,15 @@ agent 可以调用的工具（部分）：
 
 ## 七、和其他方案的区别（一图看懂）
 
-| 维度 | jupyter-ai v3 | Datalayer MCP | NBI |
-|---|---|---|---|
-| AI 在哪 | JupyterLab 内 | Claude Code/Desktop 内 | JupyterLab 内 |
-| 谁是宿主 | JupyterLab | Claude client | JupyterLab |
-| Agent 切换 | ✅ 多 agent 共存 | 跟 client 走 | 主推 Copilot/Claude |
-| 行内补全 | ❌ (v3 暂时移除) | ❌ | ✅ ghost text |
-| 多 chat | ✅ 文件化 | 单 session | ✅ |
-| 适合场景 | 想留在 Lab 里干活 | 想留在终端干活 | 要 Copilot 体验 |
+| 维度       | jupyter-ai v3 | Datalayer MCP         | NBI               |
+| -------- | ------------- | --------------------- | ----------------- |
+| AI 在哪    | JupyterLab 内  | Claude Code/Desktop 内 | JupyterLab 内      |
+| 谁是宿主     | JupyterLab    | Claude client         | JupyterLab        |
+| Agent 切换 | ✅ 多 agent 共存  | 跟 client 走            | 主推 Copilot/Claude |
+| 行内补全     | ❌ (v3 暂时移除)   | ❌                     | ✅ ghost text      |
+| 多 chat   | ✅ 文件化         | 单 session             | ✅                 |
+| 适合场景     | 想留在 Lab 里干活   | 想留在终端干活               | 要 Copilot 体验      |
+|          |               |                       |                   |
 
 ---
 

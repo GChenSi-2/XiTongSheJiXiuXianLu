@@ -59,16 +59,16 @@
   "OSpdf/cpu-intro.pdf": "LiBookOpen",
   "OSpdf/cpu-mechanisms.pdf": "LiBookOpen",
   "OSnote/Process_py.md": "LiFileCode",
-  "getBoundingClientRect.md": "LiRuler",
-  "React Portal.md": "LiLayers",
   "组件拆分 - 容器组件与展示组件.md": "LiBox",
-  "Tooltip 组件拆分设计.md": "LiPenBox",
-  "Git 版本管理指南.md": "LiGit2",
   "知识管理/研究工作流": "LiFlaskConical",
   "知识管理/研究工作流/Obsidian-Jupyter-Quarto 联动指南.md": "LiLink",
   "research": "LiFlaskConical",
   "research/demo-project/demo-analysis.qmd": "LiFileCode",
   "_output": "LiFolderOutput",
-  "obsidian-jupyter-plugin-implementation.md": "LiWrench",
-  "obsidian-jupyter-plugin-design.md": "LiNotebookPen"
+  "未归档笔记/getBoundingClientRect.md": "LiRuler",
+  "未归档笔记/Git 版本管理指南.md": "LiGit2",
+  "未归档笔记/obsidian-jupyter-plugin-design.md": "LiNotebookPen",
+  "未归档笔记/obsidian-jupyter-plugin-implementation.md": "LiWrench",
+  "未归档笔记/React Portal.md": "LiLayers",
+  "未归档笔记/Tooltip 组件拆分设计.md": "LiPenBox"
 }

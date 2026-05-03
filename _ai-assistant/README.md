@@ -1,6 +1,6 @@
 # Obsidian AI 虚拟形象语音助手 MVP
 
-这是 [[AI虚拟形象语音助手设计.md]] 的本地实现。当前主线是 v0.2：**常驻 Python server + Obsidian 控制面板手动开始/停止录音**。
+这是 [[AI虚拟形象语音助手设计]] 的本地实现。当前主线是 v0.2：**常驻 Python server + Obsidian 控制面板手动开始/停止录音**。
 
 当前版本目标：
 

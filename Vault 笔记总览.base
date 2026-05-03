@@ -1,0 +1,41 @@
+filters:
+  and:
+    - '!file.folder.startsWith("_")'
+    - '!file.folder.contains("/_")'
+    - '!file.folder.startsWith(".")'
+    - '!file.folder.contains("/.")'
+    - file.name != "Vault 笔记目录"
+formulas:
+  文件夹: if(file.folder.isEmpty(), "根目录", file.folder)
+  笔记: file.asLink(file.basename)
+properties:
+  formula.笔记:
+    displayName: 笔记
+  formula.文件夹:
+    displayName: 文件夹
+  file.path:
+    displayName: 路径
+  file.mtime:
+    displayName: 最近修改
+views:
+  - type: table
+    name: 按文件夹
+    groupBy:
+      property: formula.文件夹
+      direction: ASC
+    order:
+      - formula.笔记
+      - formula.文件夹
+      - file.path
+      - file.mtime
+    sort: []
+  - type: table
+    name: 最近修改
+    order:
+      - formula.笔记
+      - formula.文件夹
+      - file.mtime
+      - file.path
+    sort:
+      - property: file.mtime
+        direction: ASC

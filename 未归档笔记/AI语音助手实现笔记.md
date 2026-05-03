@@ -1,6 +1,6 @@
 ## Obsidian AI 语音助手 — 实现笔记
 
-> 配套设计文档：[[AI虚拟形象语音助手设计.md]]
+> 配套设计文档：[[AI虚拟形象语音助手设计]]
 > Python 助手入口：`[[_ai-assistant/assistant.py]]`
 > Obsidian 插件入口：`[[.obsidian/plugins/ai-voice-assistant/README.md]]`
 
@@ -528,7 +528,7 @@ maybeHandleConfirmation(proc, text, getConfirmationOpen, setConfirmationOpen) {
 
 #### 9.1 为什么继续直接写 `main.js`
 
-这次参考了 [[obsidian-jupyter-plugin-implementation.md]] 的取舍：插件规模不大，直接写原生 JS。
+这次参考了 [[obsidian-jupyter-plugin-implementation]] 的取舍：插件规模不大，直接写原生 JS。
 
 | 维度 | TS + bundle | 直接写 main.js |
 |---|---|---|

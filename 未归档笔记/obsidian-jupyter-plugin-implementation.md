@@ -1,6 +1,6 @@
 ## Obsidian Jupyter Lab Launcher — 实现笔记
 
-> 配套设计文档：[[obsidian-jupyter-plugin-design.md]]
+> 配套设计文档：[[obsidian-jupyter-plugin-design]]
 > 启动脚本参考：[[通过anaconda启动JupyterLab.bat]]
 
 记录把设计文档落到 v0.1 可用插件的过程，重点是几个 **如果重写一次还是会这么做** 的关键决策、和被坑过一遍才知道答案的小细节。
