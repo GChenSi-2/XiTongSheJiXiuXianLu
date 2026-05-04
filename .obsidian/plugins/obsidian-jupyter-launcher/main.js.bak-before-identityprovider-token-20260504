@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 /*
  * Obsidian Jupyter Lab Launcher
@@ -100,7 +100,7 @@ class JupyterManager {
       '--no-browser',
       `--port=${port}`,
       '--ServerApp.open_browser=False',
-      '--IdentityProvider.token=' + token,
+      '--ServerApp.token=' + token,
       '--ServerApp.password=',
       `--ServerApp.root_dir=${workDir}`,
     ];

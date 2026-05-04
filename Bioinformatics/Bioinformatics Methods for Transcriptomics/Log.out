@@ -1,0 +1,24 @@
+STAR version=2.7.11b
+STAR compilation time,server,dir=2025-11-14T12:06:42+0000 :/opt/conda/conda-bld/star_1763121846936/work/source
+##### Command Line:
+/home/silicon/.local/share/ngs-wsl-tools/envs/ngs-linux/bin/STAR-avx2 --genomeDir /path/to/genome --readFilesIn read1.fastq
+##### Initial USER parameters from Command Line:
+###### All USER parameters from Command Line:
+genomeDir                     /path/to/genome     ~RE-DEFINED
+readFilesIn                   read1.fastq        ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+genomeDir                         /path/to/genome
+readFilesIn                       read1.fastq   
+
+-------------------------------
+##### Final effective command line:
+/home/silicon/.local/share/ngs-wsl-tools/envs/ngs-linux/bin/STAR-avx2   --genomeDir /path/to/genome   --readFilesIn read1.fastq   
+----------------------------------------
+
+Number of fastq files for each mate = 1
+
+EXITING because of fatal input ERROR: could not open readFilesIn=read1.fastq
+
+May 05 00:39:39 ...... FATAL ERROR, exiting
