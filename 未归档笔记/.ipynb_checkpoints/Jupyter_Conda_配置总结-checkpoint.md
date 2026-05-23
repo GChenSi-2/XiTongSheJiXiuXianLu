@@ -9,11 +9,11 @@
 
 容易被混淆的三个"workspace":
 
-| 名字                       | 是什么                    | 由谁管                          | 存在哪                                                |
-| ------------------------ | ---------------------- | ---------------------------- | -------------------------------------------------- |
-| **Server root_dir**      | Jupyter 文件浏览器的根目录      | `c.ServerApp.root_dir`(配置文件) | `~/.jupyter/jupyter_lab_config.py`                 |
-| **JupyterLab Workspace** | 标签页 / 面板布局快照           | JupyterLab 前端                | `~/.jupyter/lab/workspaces/*.jupyterlab-workspace` |
-| **Conda 环境(env)**        | Python 解释器 + 库 + 可执行文件 | conda                        | `<miniconda>/envs/<name>/`                         |
+| 名字 | 是什么 | 由谁管 | 存在哪 |
+|---|---|---|---|
+| **Server root_dir** | Jupyter 文件浏览器的根目录 | `c.ServerApp.root_dir`(配置文件) | `~/.jupyter/jupyter_lab_config.py` |
+| **JupyterLab Workspace** | 标签页 / 面板布局快照 | JupyterLab 前端 | `~/.jupyter/lab/workspaces/*.jupyterlab-workspace` |
+| **Conda 环境(env)** | Python 解释器 + 库 + 可执行文件 | conda | `<miniconda>/envs/<name>/` |
 
 三者**完全独立**,conda 不管前两个,Jupyter 不管最后一个。
 

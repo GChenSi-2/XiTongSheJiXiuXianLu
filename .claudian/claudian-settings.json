@@ -1,8 +1,8 @@
 {
   "userName": "",
   "permissionMode": "yolo",
-  "model": "sonnet",
-  "thinkingBudget": "low",
+  "model": "opus[1m]",
+  "thinkingBudget": "medium",
   "effortLevel": "high",
   "serviceTier": "default",
   "enableAutoTitleGeneration": true,
@@ -19,13 +19,14 @@
     "scrollDownKey": "s",
     "focusInputKey": "i"
   },
+  "requireCommandOrControlEnterToSend": false,
   "locale": "en",
   "providerConfigs": {
     "claude": {
       "safeMode": "acceptEdits",
       "cliPath": "",
       "cliPathsByHost": {
-        "DESKTOP-OUT1C7N": "C:\\Users\\user\\.local\\bin\\claude.exe"
+        "device:7499903c-3b08-406e-89b7-624f93a93679": "C:\\Users\\user\\.local\\bin\\claude.exe"
       },
       "loadUserSettings": true,
       "enableChrome": false,
@@ -33,7 +34,7 @@
       "enableOpus1M": true,
       "enableSonnet1M": false,
       "customModels": "",
-      "lastModel": "sonnet",
+      "lastModel": "opus[1m]",
       "environmentVariables": "",
       "environmentHash": ""
     },
@@ -42,21 +43,33 @@
       "safeMode": "workspace-write",
       "cliPath": "",
       "cliPathsByHost": {
-        "DESKTOP-OUT1C7N": "C:\\Users\\user\\AppData\\Roaming\\npm\\codex.cmd"
+        "device:7499903c-3b08-406e-89b7-624f93a93679": "C:\\Users\\user\\AppData\\Roaming\\npm\\codex.cmd"
       },
       "customModels": "",
       "reasoningSummary": "auto",
       "environmentVariables": "",
       "environmentHash": "",
       "installationMethodsByHost": {
-        "DESKTOP-OUT1C7N": "native-windows"
+        "device:7499903c-3b08-406e-89b7-624f93a93679": "native-windows"
       },
       "wslDistroOverridesByHost": {}
+    },
+    "opencode": {
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "enabled": false,
+      "environmentHash": "",
+      "environmentVariables": "",
+      "modelAliases": {},
+      "preferredThinkingByModel": {},
+      "selectedMode": "",
+      "thinkingOptionsByModel": {},
+      "visibleModels": []
     }
   },
   "settingsProvider": "claude",
   "savedProviderModel": {
-    "claude": "sonnet",
+    "claude": "opus[1m]",
     "codex": "gpt-5.5"
   },
   "savedProviderEffort": {
@@ -67,7 +80,7 @@
     "codex": "default"
   },
   "savedProviderThinkingBudget": {
-    "claude": "low",
+    "claude": "medium",
     "codex": "low"
   },
   "savedProviderPermissionMode": {
@@ -75,9 +88,10 @@
     "codex": "yolo"
   },
   "lastCustomModel": "",
-  "maxTabs": 5,
+  "maxTabs": 6,
   "tabBarPosition": "input",
   "enableAutoScroll": true,
-  "openInMainTab": false,
+  "deferMathRenderingDuringStreaming": true,
+  "chatViewPlacement": "right-sidebar",
   "hiddenProviderCommands": {}
 }

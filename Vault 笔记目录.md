@@ -71,7 +71,7 @@ excludes:
   - [[test_pair]]
   - [[Tooltip 组件拆分设计]]
   - [[typescript-cheatsheet]]
-  - [[Untitled.md]]
+  - [[CookBook]]
   - [[控制反转-IoC-笔记.md]]
   - [[提示词.md]]
   - [[组件拆分 - 容器组件与展示组件.md]]

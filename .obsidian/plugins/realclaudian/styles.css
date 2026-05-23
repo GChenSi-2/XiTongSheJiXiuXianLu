@@ -56,6 +56,18 @@ body.theme-light .claudian-container {
   font-family: var(--font-text);
 }
 
+.claudian-hidden {
+  display: none !important;
+}
+
+.claudian-visible-block {
+  display: block !important;
+}
+
+.claudian-visible-flex {
+  display: flex !important;
+}
+
 .claudian-provider-icon-variant--dark {
   display: none;
 }
@@ -1148,6 +1160,11 @@ body.theme-light .claudian-message-content pre {
   white-space: pre;
 }
 
+.claudian-tool-line-wrap {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* Hover highlight for file search results */
 .claudian-tool-line.hoverable:hover {
   background: var(--background-modifier-hover);
@@ -1269,13 +1286,6 @@ body.theme-light .claudian-message-content pre {
 
 .claudian-tool-patch-section + .claudian-tool-patch-section {
   margin-top: 10px;
-}
-
-.claudian-tool-patch-header {
-  font-family: var(--font-monospace);
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
 }
 
 .claudian-tool-result-item:last-child {
@@ -1462,7 +1472,6 @@ body.theme-light .claudian-message-content pre {
 
 .claudian-status-panel-bash-content {
   padding-top: 2px;
-  max-height: 320px;
   max-height: min(40vh, 320px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1790,6 +1799,14 @@ body.theme-light .claudian-message-content pre {
   min-height: 0;
 }
 
+.claudian-input-nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+}
+
 /* Header mode: hide nav row above input (content moved to header) */
 .claudian-container--header-mode .claudian-input-nav-row {
   display: none;
@@ -1821,8 +1838,8 @@ body.theme-light .claudian-message-content pre {
 .claudian-input {
   width: 100%;
   flex: 1 1 0;
-  min-height: 60px;
-  /* max-height dynamically set by JS: max(150px, 55% of view height) */
+  min-height: var(--claudian-textarea-min-height, 60px);
+  max-height: var(--claudian-textarea-max-height, none);
   resize: none;
   padding: 8px 10px 10px 10px;
   border: none !important;
@@ -1940,6 +1957,13 @@ body.theme-light .claudian-message-content pre {
   text-overflow: ellipsis;
 }
 
+.claudian-queue-indicator-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .claudian-queue-indicator-action {
   flex: 0 0 auto;
   padding: 1px 8px;
@@ -1958,6 +1982,31 @@ body.theme-light .claudian-message-content pre {
   color: var(--text-faint);
   cursor: default;
   text-decoration: none;
+}
+
+.claudian-queue-indicator-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.claudian-queue-indicator-icon-action:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.claudian-queue-indicator-icon-action svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* Light blue border when instruction mode is active */
@@ -2772,6 +2821,10 @@ body.theme-light .claudian-message-content pre {
 /* Fixed positioning for inline editor */
 .claudian-mention-dropdown-fixed {
   position: fixed;
+  bottom: var(--claudian-fixed-dropdown-bottom);
+  left: var(--claudian-fixed-dropdown-left);
+  right: auto;
+  width: var(--claudian-fixed-dropdown-width);
   z-index: 10001;
 }
 
@@ -3266,7 +3319,7 @@ code .claudian-file-link:hover {
 
 /* CM6 widget container - ensure transparent background */
 .cm-widgetBuffer,
-.cm-line:has(.claudian-inline-input-container) {
+.cm-line.claudian-inline-input-line {
   background: transparent !important;
 }
 
@@ -3627,6 +3680,10 @@ code .claudian-file-link:hover {
 /* Fixed positioning for inline editor */
 .claudian-slash-dropdown-fixed {
   position: fixed;
+  bottom: var(--claudian-fixed-dropdown-bottom);
+  left: var(--claudian-fixed-dropdown-left);
+  right: auto;
+  width: var(--claudian-fixed-dropdown-width);
   z-index: 10001;
 }
 
@@ -4792,6 +4849,28 @@ code .claudian-file-link:hover {
   color: var(--text-error);
 }
 
+.claudian-setting-validation {
+  font-size: var(--font-ui-smaller);
+  margin-top: -0.5em;
+  margin-bottom: 0.5em;
+}
+
+.claudian-setting-validation-error {
+  color: var(--text-error);
+}
+
+.claudian-setting-validation-warning {
+  color: var(--text-warning);
+}
+
+.claudian-settings-cli-path-input {
+  width: 100%;
+}
+
+.claudian-settings-cli-path-input.claudian-input-error {
+  border-color: var(--text-error);
+}
+
 /* Hotkey grid - 3 columns */
 .claudian-hotkey-grid {
   display: grid;
@@ -5051,7 +5130,6 @@ code .claudian-file-link:hover {
 }
 
 .claudian-context-limit-validation {
-  display: none;
   font-size: var(--font-ui-smaller);
   color: var(--text-error);
   margin-top: 4px;

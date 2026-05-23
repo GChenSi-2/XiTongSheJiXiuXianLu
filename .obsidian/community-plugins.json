@@ -5,7 +5,6 @@
   "text-extractor",
   "obsidian-excalidraw-plugin",
   "obsidian42-brat",
-  "claudian",
   "obsidian-icon-folder",
   "execute-code",
   "vscode-editor",
@@ -20,5 +19,6 @@
   "obsidian-minimal-settings",
   "obsidian-style-settings",
   "obsidian-jupyter-launcher",
-  "ai-voice-assistant"
+  "ai-voice-assistant",
+  "realclaudian"
 ]

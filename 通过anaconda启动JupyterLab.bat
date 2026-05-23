@@ -1,8 +1,8 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 REM ==================================================================
 REM Launch JupyterLab via anaconda3 base (FORCED - absolute path)
-REM root_dir = C:\Users\user\Desktop\operation system
+REM root_dir = C:\Users\user\Desktop\Silicon's AI Lab
 REM ==================================================================
 
 REM ---- 1. Activate conda base ----
@@ -45,11 +45,12 @@ echo Python:        %CONDA_PREFIX%\python.exe
 echo.
 echo ==================================================================
 echo  Starting JupyterLab
-echo  root_dir = C:\Users\user\Desktop\operation system
+echo  root_dir = C:\Users\user\Desktop\Silicon's AI Lab
 echo ==================================================================
 echo.
 
 REM ---- 4. Launch with ABSOLUTE PATH - guarantees we use base's jupyter ----
-"%CONDA_PREFIX%\Scripts\jupyter.exe" lab --ServerApp.root_dir="C:\Users\user\Desktop\operation system"
+"%CONDA_PREFIX%\Scripts\jupyter.exe" lab --ServerApp.root_dir="C:\Users\user\Desktop\Silicon's AI Lab"
 
 pause
+
