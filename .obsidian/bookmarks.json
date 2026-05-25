@@ -25,7 +25,13 @@
     {
       "type": "group",
       "ctime": 1777468913091,
-      "items": [],
+      "items": [
+        {
+          "type": "file",
+          "ctime": 1779730523114,
+          "path": "Bioinformatics/Bioinformatics Methods for Transcriptomics/ExperimentNote/WSL2_Bioinfo_Setup_Guide.md"
+        }
+      ],
       "title": "Bioinformatics"
     },
     {
