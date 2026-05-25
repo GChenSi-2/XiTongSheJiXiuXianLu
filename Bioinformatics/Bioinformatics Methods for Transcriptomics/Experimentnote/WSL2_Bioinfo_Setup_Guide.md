@@ -156,12 +156,12 @@ sudo usermod -aG docker $USER
 
 ### 核心概念
 
-| 概念 | 说明 |
-|------|------|
-| **Process** | 一个独立的计算步骤（如 FASTQC、BWA 比对） |
-| **Channel** | 进程之间的数据管道，连接输入和输出 |
-| **Workflow** | 将多个 Process 串联成完整流程 |
-| **DSL2** | 当前标准语法，支持模块化和函数复用 |
+| 概念           | 说明                         |
+| ------------ | -------------------------- |
+| **Process**  | 一个独立的计算步骤（如 FASTQC、BWA 比对） |
+| **Channel**  | 进程之间的数据管道，连接输入和输出          |
+| **Workflow** | 将多个 Process 串联成完整流程        |
+| **DSL2**     | 当前标准语法，支持模块化和函数复用          |
 
 ### 最简示例
 
@@ -283,18 +283,18 @@ nf-core list --search variant
 
 ### 常用流程一览
 
-| 流程 | 用途 | 运行命令 |
-|------|------|----------|
-| **nf-core/rnaseq** | RNA-Seq 全流程（QC→比对→定量） | `nextflow run nf-core/rnaseq` |
-| **nf-core/sarek** | 全基因组/外显子变异检测（GATK） | `nextflow run nf-core/sarek` |
-| **nf-core/chipseq** | ChIP-Seq 峰值检测 | `nextflow run nf-core/chipseq` |
-| **nf-core/atacseq** | ATAC-Seq 染色质可及性分析 | `nextflow run nf-core/atacseq` |
-| **nf-core/methylseq** | 甲基化测序分析 | `nextflow run nf-core/methylseq` |
+| 流程                     | 用途                    | 运行命令                              |
+| ---------------------- | --------------------- | --------------------------------- |
+| **nf-core/rnaseq**     | RNA-Seq 全流程（QC→比对→定量） | `nextflow run nf-core/rnaseq`     |
+| **nf-core/sarek**      | 全基因组/外显子变异检测（GATK）    | `nextflow run nf-core/sarek`      |
+| **nf-core/chipseq**    | ChIP-Seq 峰值检测         | `nextflow run nf-core/chipseq`    |
+| **nf-core/atacseq**    | ATAC-Seq 染色质可及性分析     | `nextflow run nf-core/atacseq`    |
+| **nf-core/methylseq**  | 甲基化测序分析               | `nextflow run nf-core/methylseq`  |
 | **nf-core/viralrecon** | 病毒基因组分析（含 SARS-CoV-2） | `nextflow run nf-core/viralrecon` |
-| **nf-core/scrnaseq** | 单细胞 RNA-Seq | `nextflow run nf-core/scrnaseq` |
-| **nf-core/fetchngs** | 自动下载 SRA/ENA/GEO 数据 | `nextflow run nf-core/fetchngs` |
-| **nf-core/mag** | 宏基因组组装与分箱 | `nextflow run nf-core/mag` |
-| **nf-core/ampliseq** | 16S/ITS 扩增子测序 | `nextflow run nf-core/ampliseq` |
+| **nf-core/scrnaseq**   | 单细胞 RNA-Seq           | `nextflow run nf-core/scrnaseq`   |
+| **nf-core/fetchngs**   | 自动下载 SRA/ENA/GEO 数据   | `nextflow run nf-core/fetchngs`   |
+| **nf-core/mag**        | 宏基因组组装与分箱             | `nextflow run nf-core/mag`        |
+| **nf-core/ampliseq**   | 16S/ITS 扩增子测序         | `nextflow run nf-core/ampliseq`   |
 
 ### 下载流程（离线使用）
 
