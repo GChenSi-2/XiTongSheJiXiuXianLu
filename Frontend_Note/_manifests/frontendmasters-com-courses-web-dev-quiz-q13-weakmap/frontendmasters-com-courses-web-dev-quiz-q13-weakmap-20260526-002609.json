@@ -1,0 +1,25 @@
+﻿{
+    "generated_at":  "2026-05-26T00:26:09.3956018+09:00",
+    "course_id":  "frontendmasters-com-courses-web-dev-quiz-q13-weakmap",
+    "course_title":  "Frontend Masters - Web Dev Quiz - Q13 WeakMap",
+    "course_url":  "https://frontendmasters.com/courses/web-dev-quiz/q13-weakmap/",
+    "notebooklm_url":  "https://notebooklm.google.com/notebook/82628d5e-bb3a-48af-9d8b-55b763d4a880",
+    "vault_dir":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note",
+    "video_inbox":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\00_Inbox\\Video\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap",
+    "audio_inbox":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\00_Inbox\\Audio\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap",
+    "sources_dir":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\01_Sources\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap",
+    "notes_dir":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\02_Notes\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap",
+    "prompt_path":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\_manifests\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap-notebooklm-prompt.md",
+    "upload_candidates":  [
+                              "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\01_Sources\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap\\Learn Q13 WeakMap Advanced Web Development Quiz.m4a"
+                          ],
+    "sources":  [
+                    {
+                        "original_path":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\00_Inbox\\Video\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap\\Learn Q13 WeakMap Advanced Web Development Quiz.mp4",
+                        "source_path":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\01_Sources\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap\\Learn Q13 WeakMap Advanced Web Development Quiz.mp4",
+                        "audio_upload_path":  "C:\\Users\\user\\Desktop\\Silicon\u0027s AI Lab\\Frontend_Note\\01_Sources\\frontendmasters-com-courses-web-dev-quiz-q13-weakmap\\Learn Q13 WeakMap Advanced Web Development Quiz.m4a",
+                        "status":  "copied_and_audio_extracted",
+                        "size_bytes":  20504286
+                    }
+                ]
+}
