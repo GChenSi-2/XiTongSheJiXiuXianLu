@@ -162,6 +162,7 @@ sudo usermod -aG docker $USER
 | **Channel**  | 进程之间的数据管道，连接输入和输出          |
 | **Workflow** | 将多个 Process 串联成完整流程        |
 | **DSL2**     | 当前标准语法，支持模块化和函数复用          |
+|              |                            |
 
 ### 最简示例
 
