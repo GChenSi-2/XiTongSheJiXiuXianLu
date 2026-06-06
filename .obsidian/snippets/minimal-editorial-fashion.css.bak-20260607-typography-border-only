@@ -1,0 +1,634 @@
+﻿/*
+Minimal Editorial Fashion — Obsidian CSS snippet
+Inspired by restrained British / European menswear retail typography.
+Enable in: Settings → Appearance → CSS snippets.
+*/
+
+:root,
+.theme-light,
+.theme-dark {
+  /* Typography */
+  --font-text: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-interface: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-monospace: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text-size: 13.5px;
+  --font-ui-small: 10px;
+  --line-height-normal: 1.9;
+  --line-height-tight: 1.45;
+
+  /* Editorial color system */
+  --background-primary: #ffffff;
+  --background-primary-alt: #ffffff;
+  --background-secondary: #ffffff;
+  --background-secondary-alt: #ffffff;
+  --background-modifier-hover: transparent;
+  --background-modifier-active-hover: transparent;
+  --background-modifier-border: #e0e0e0;
+  --background-modifier-border-hover: #111111;
+  --background-modifier-border-focus: #111111;
+  --background-modifier-form-field: #ffffff;
+  --background-modifier-form-field-highlighted: #ffffff;
+
+  --text-normal: #111111;
+  --text-muted: #888888;
+  --text-faint: #aaaaaa;
+  --text-accent: #111111;
+  --text-accent-hover: #111111;
+  --text-on-accent: #ffffff;
+  --interactive-normal: transparent;
+  --interactive-hover: transparent;
+  --interactive-accent: #111111;
+  --interactive-accent-hover: #111111;
+  --color-accent: #111111;
+  --color-accent-1: #111111;
+  --color-accent-2: #111111;
+
+  /* Dividers and shapes */
+  --divider-color: #e0e0e0;
+  --divider-width: 1px;
+  --tab-outline-color: #e0e0e0;
+  --modal-border-color: #e0e0e0;
+  --input-border-color: #e0e0e0;
+  --hr-color: #e0e0e0;
+  --blockquote-border-color: #e0e0e0;
+  --table-border-color: #e0e0e0;
+  --table-header-border-color: #e0e0e0;
+  --table-row-alt-background: #ffffff;
+
+  --radius-s: 0;
+  --radius-m: 0;
+  --radius-l: 0;
+  --radius-xl: 0;
+  --checkbox-radius: 0;
+  --tag-radius: 0;
+  --tab-radius-active: 0;
+  --input-radius: 0;
+  --button-radius: 0;
+
+  /* Tags */
+  --tag-size: 9.5px;
+  --tag-color: #111111;
+  --tag-color-hover: #111111;
+  --tag-background: transparent;
+  --tag-background-hover: transparent;
+  --tag-border-color: #111111;
+  --tag-border-color-hover: #111111;
+
+  /* Reading width */
+  --file-line-width: 680px;
+}
+
+/* Global restraint: no gloss, shadows, gradients, or rounded panels */
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body,
+.app-container,
+.workspace,
+.workspace-split,
+.workspace-tabs,
+.workspace-leaf,
+.workspace-leaf-content,
+.workspace-ribbon,
+.side-dock-ribbon,
+.workspace-sidedock-vault-profile,
+.titlebar,
+.status-bar,
+.modal,
+.prompt,
+.menu,
+.suggestion-container,
+.popover,
+.notice {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111;
+  border-radius: 0 !important;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.9;
+  letter-spacing: 0.025em;
+  font-weight: 400;
+}
+
+/* Main writing surface */
+.markdown-source-view,
+.markdown-preview-view,
+.markdown-rendered,
+.markdown-source-view.mod-cm6 .cm-content,
+.markdown-source-view.mod-cm6 .cm-line {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.9;
+  letter-spacing: 0.025em;
+  font-weight: 400;
+  color: #111111;
+}
+
+.markdown-source-view.mod-cm6 .cm-scroller,
+.markdown-preview-view {
+  padding-inline: max(2rem, calc((100% - 680px) / 2)) !important;
+}
+
+.markdown-preview-view .markdown-preview-sizer,
+.markdown-source-view.mod-cm6 .cm-contentContainer,
+.markdown-source-view.mod-cm6 .cm-content {
+  max-width: 680px;
+  margin-inline: auto;
+}
+
+/* Editorial headings: light, uppercase, tracked */
+.markdown-rendered h1,
+.markdown-rendered h2,
+.markdown-rendered h3,
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6,
+.cm-header,
+.inline-title,
+.view-header-title {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  line-height: 1.45;
+  color: #111111;
+}
+
+.inline-title,
+.markdown-rendered h1,
+.cm-header-1 {
+  font-size: 18px !important;
+  margin-block: 3rem 1.25rem;
+}
+
+.markdown-rendered h2,
+.cm-header-2 {
+  font-size: 14px !important;
+  margin-block: 2.6rem 1rem;
+}
+
+.markdown-rendered h3,
+.cm-header-3 {
+  font-size: 12px !important;
+  margin-block: 2.25rem 0.75rem;
+}
+
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6,
+.cm-header-4,
+.cm-header-5,
+.cm-header-6 {
+  font-size: 11px !important;
+  margin-block: 2rem 0.75rem;
+}
+
+/* Remove heavy typographic emphasis without disabling emphasis entirely */
+strong,
+b,
+.cm-strong,
+.markdown-rendered strong,
+.metadata-property-key,
+.setting-item-name,
+.nav-folder-title,
+.nav-file-title,
+.tree-item-self,
+.workspace-tab-header-inner-title {
+  font-weight: 400 !important;
+}
+
+em,
+i,
+.cm-em {
+  font-style: italic;
+}
+
+p,
+ul,
+ol,
+pre,
+blockquote,
+table {
+  margin-block: 0 1.15rem;
+}
+
+.markdown-rendered > * + h1,
+.markdown-rendered > * + h2,
+.markdown-rendered > * + h3 {
+  margin-top: 3rem;
+}
+
+/* Links: quiet by default, underline only on hover */
+a,
+.external-link,
+.internal-link,
+.markdown-rendered a,
+.cm-link,
+.cm-url,
+.cm-hmd-internal-link,
+.cm-hmd-external-link {
+  color: inherit !important;
+  text-decoration: none !important;
+  background-image: none !important;
+}
+
+a:hover,
+.external-link:hover,
+.internal-link:hover,
+.markdown-rendered a:hover,
+.cm-link:hover,
+.cm-url:hover,
+.cm-hmd-internal-link:hover,
+.cm-hmd-external-link:hover {
+  color: #111111 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #111111;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+/* Structural borders and dividers */
+.view-header,
+.workspace-tab-header-container,
+.workspace-leaf-resize-handle,
+.workspace-split.mod-left-split,
+.workspace-split.mod-right-split,
+.workspace-sidedock-vault-profile,
+.status-bar,
+.mod-root .workspace-tab-header-container,
+.modal,
+.prompt,
+.menu,
+.suggestion-container,
+.popover,
+.metadata-container,
+.metadata-property,
+.setting-item,
+.vertical-tab-header,
+.vertical-tab-content,
+.nav-header,
+.search-result-file-match,
+.backlink-pane > .tree-item-self {
+  border-color: #e0e0e0 !important;
+}
+
+.workspace-split.mod-left-split,
+.workspace-split.mod-right-split {
+  border-inline-color: #e0e0e0 !important;
+}
+
+hr,
+.markdown-rendered hr {
+  border: 0;
+  border-top: 1px solid #e0e0e0;
+  margin: 2.75rem 0;
+}
+
+/* Sidebars: small labels, wide spacing, monochrome */
+.workspace-ribbon,
+.side-dock-ribbon,
+.nav-files-container,
+.workspace-sidedock-vault-profile,
+.workspace-tabs .workspace-leaf,
+.workspace-tab-header,
+.nav-header,
+.tree-item,
+.search-result-container {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+.nav-folder-title,
+.nav-file-title,
+.tree-item-self,
+.workspace-tab-header-inner-title,
+.side-dock-ribbon-action,
+.workspace-ribbon .clickable-icon,
+.nav-action-button,
+.titlebar-button,
+.status-bar-item,
+.metadata-property-key,
+.setting-item-name,
+.vertical-tab-nav-item {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px !important;
+  line-height: 1.45;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #111111 !important;
+  font-weight: 400 !important;
+}
+
+.nav-folder-title:hover,
+.nav-file-title:hover,
+.tree-item-self:hover,
+.workspace-tab-header:hover,
+.vertical-tab-nav-item:hover,
+.nav-action-button:hover,
+.side-dock-ribbon-action:hover,
+.clickable-icon:hover {
+  background: transparent !important;
+  color: #111111 !important;
+}
+
+.workspace-tab-header.is-active {
+  background: #ffffff !important;
+  border-bottom: 1px solid #111111 !important;
+}
+
+.workspace-tab-header.is-active .workspace-tab-header-inner-title {
+  color: #111111 !important;
+}
+
+/* De-color icons, folder markers, and plugin-added file glyphs */
+svg,
+.clickable-icon svg,
+.nav-folder-collapse-indicator svg,
+.nav-folder-title svg,
+.nav-file-title svg,
+.tree-item-icon svg,
+.workspace-tab-header-inner-icon svg,
+.status-bar-item svg,
+.side-dock-ribbon-action svg {
+  color: #888888 !important;
+  stroke: currentColor !important;
+  filter: grayscale(1) contrast(0.75) !important;
+}
+
+.nav-folder-title-content::before,
+.nav-file-title-content::before,
+.tree-item-inner::before {
+  color: #888888 !important;
+  filter: grayscale(1) !important;
+}
+
+/* Tags and badges: outlined, square, tiny uppercase */
+.tag,
+.cm-hashtag,
+.cm-hashtag-begin,
+.cm-hashtag-end,
+.multi-select-pill,
+.suggestion-flair,
+.flair,
+.setting-hotkey,
+.metadata-property .multi-select-pill,
+.search-result-file-matched-text {
+  display: inline-flex;
+  align-items: center;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #111111 !important;
+  border: 1px solid #111111 !important;
+  border-radius: 0 !important;
+  font-size: 9.5px !important;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+  padding: 0.12rem 0.38rem;
+}
+
+.tag:hover,
+.cm-hashtag:hover,
+.multi-select-pill:hover {
+  background: transparent !important;
+  color: #111111 !important;
+  text-decoration: none !important;
+}
+
+/* Buttons and toolbars: no fill, no rounded pills */
+button,
+.mod-cta,
+.mod-warning,
+.clickable-icon,
+.nav-action-button,
+.titlebar-button,
+.side-dock-ribbon-action,
+.workspace-ribbon .clickable-icon,
+.metadata-add-button,
+.metadata-property-icon,
+.search-input-clear-button {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #111111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+button,
+.mod-cta,
+.mod-warning {
+  border: 1px solid #e0e0e0 !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+  padding: 0.55rem 0.85rem;
+}
+
+button:hover,
+.mod-cta:hover,
+.mod-warning:hover,
+.clickable-icon:hover {
+  border-color: #111111 !important;
+}
+
+/* Inputs and search */
+input,
+textarea,
+select,
+.dropdown,
+.search-input-container input,
+.prompt-input,
+.metadata-input,
+.metadata-input-longtext,
+.workspace-leaf-content[data-type="search"] input {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 0 !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px !important;
+  letter-spacing: 0.04em;
+  box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.prompt-input:focus,
+.metadata-input:focus {
+  border-color: #111111 !important;
+  box-shadow: none !important;
+}
+
+/* Checkboxes: square outline, monochrome checked state */
+input[type="checkbox"],
+.task-list-item-checkbox {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  border: 1px solid #111111 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  vertical-align: -0.12em;
+  position: relative;
+}
+
+input[type="checkbox"]:checked,
+.task-list-item-checkbox:checked {
+  background: #111111 !important;
+  border-color: #111111 !important;
+}
+
+input[type="checkbox"]:checked::after,
+.task-list-item-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 3px;
+  height: 6px;
+  border: solid #ffffff;
+  border-width: 0 1px 1px 0;
+  transform: rotate(45deg);
+}
+
+.markdown-rendered .task-list-item,
+.markdown-source-view.mod-cm6 .HyperMD-task-line {
+  text-decoration-thickness: 1px;
+  color: #111111;
+}
+
+/* Tables, quotes, code, and callouts: hairline editorial modules */
+.markdown-rendered blockquote,
+.cm-quote {
+  color: #888888 !important;
+  border-left: 1px solid #e0e0e0 !important;
+  padding-left: 1rem;
+  font-style: normal;
+}
+
+.markdown-rendered table {
+  border-collapse: collapse;
+  border: 1px solid #e0e0e0;
+}
+
+.markdown-rendered th,
+.markdown-rendered td {
+  border: 1px solid #e0e0e0;
+  padding: 0.55rem 0.75rem;
+}
+
+.markdown-rendered th {
+  background: #ffffff !important;
+  color: #111111;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.markdown-rendered code,
+.cm-inline-code,
+.markdown-rendered pre,
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-codeblock {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-radius: 0 !important;
+}
+
+.markdown-rendered pre,
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-codeblock {
+  border: 1px solid #e0e0e0 !important;
+  padding: 0.75rem 1rem;
+}
+
+.callout,
+.markdown-rendered .callout {
+  --callout-color: 17, 17, 17;
+  background: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 0 !important;
+  padding: 0.75rem 1rem;
+}
+
+.callout-title,
+.callout-title-inner {
+  color: #111111 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+}
+
+.callout-icon {
+  color: #888888 !important;
+}
+
+/* Highlights and selections: monochrome only */
+mark,
+.cm-highlight,
+.search-result-file-matched-text {
+  background: #f3f3f3 !important;
+  color: #111111 !important;
+}
+
+::selection,
+.cm-selectionBackground,
+.markdown-source-view.mod-cm6 .cm-selectionBackground {
+  background: #eeeeee !important;
+  color: #111111 !important;
+}
+
+/* File explorer indentation and spacing: compact inside, airy around */
+.nav-files-container {
+  padding: 1rem 0.75rem;
+}
+
+.nav-folder-title,
+.nav-file-title,
+.tree-item-self {
+  padding-block: 0.28rem;
+  padding-inline: 0.35rem;
+}
+
+.workspace-leaf-content[data-type="markdown"] .view-content {
+  padding-top: 2rem;
+}
+
+/* Minimal scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d6d6 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d6d6d6;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaaaaa;
+}

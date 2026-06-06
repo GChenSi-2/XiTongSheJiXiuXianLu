@@ -1,0 +1,282 @@
+﻿/*
+Minimal Editorial Fashion — Obsidian CSS snippet
+Only typography, border geometry, and divider thickness declarations.
+Enable in: Settings → Appearance → CSS snippets.
+*/
+
+:root {
+  /* Typography */
+  --font-text: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-interface: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-monospace: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text-size: 13.5px;
+  --font-ui-small: 10px;
+  --line-height-normal: 1.9;
+  --line-height-tight: 1.45;
+
+  /* Border geometry */
+  --divider-width: 1px;
+  --radius-s: 0;
+  --radius-m: 0;
+  --radius-l: 0;
+  --radius-xl: 0;
+  --checkbox-radius: 0;
+  --tag-radius: 0;
+  --tab-radius-active: 0;
+  --input-radius: 0;
+  --button-radius: 0;
+}
+
+/* Base typography */
+body,
+.markdown-source-view,
+.markdown-preview-view,
+.markdown-rendered,
+.markdown-source-view.mod-cm6 .cm-content,
+.markdown-source-view.mod-cm6 .cm-line {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.9;
+  letter-spacing: 0.025em;
+  font-weight: 400;
+}
+
+/* Headings */
+.markdown-rendered h1,
+.markdown-rendered h2,
+.markdown-rendered h3,
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6,
+.cm-header,
+.inline-title,
+.view-header-title {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  line-height: 1.45;
+}
+
+.inline-title,
+.markdown-rendered h1,
+.cm-header-1 {
+  font-size: 18px !important;
+}
+
+.markdown-rendered h2,
+.cm-header-2 {
+  font-size: 14px !important;
+}
+
+.markdown-rendered h3,
+.cm-header-3 {
+  font-size: 12px !important;
+}
+
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6,
+.cm-header-4,
+.cm-header-5,
+.cm-header-6 {
+  font-size: 11px !important;
+}
+
+/* Keep weights light */
+strong,
+b,
+.cm-strong,
+.markdown-rendered strong,
+.metadata-property-key,
+.setting-item-name,
+.nav-folder-title,
+.nav-file-title,
+.tree-item-self,
+.workspace-tab-header-inner-title {
+  font-weight: 400 !important;
+}
+
+em,
+i,
+.cm-em {
+  font-style: italic;
+}
+
+/* Sidebar and interface typography */
+.nav-folder-title,
+.nav-file-title,
+.tree-item-self,
+.workspace-tab-header-inner-title,
+.side-dock-ribbon-action,
+.workspace-ribbon .clickable-icon,
+.nav-action-button,
+.titlebar-button,
+.status-bar-item,
+.metadata-property-key,
+.setting-item-name,
+.vertical-tab-nav-item {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px !important;
+  line-height: 1.45;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+}
+
+/* Tags and badges */
+.tag,
+.cm-hashtag,
+.cm-hashtag-begin,
+.cm-hashtag-end,
+.multi-select-pill,
+.suggestion-flair,
+.flair,
+.setting-hotkey,
+.metadata-property .multi-select-pill,
+.search-result-file-matched-text {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 0 !important;
+  font-size: 9.5px !important;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+}
+
+/* Buttons and toolbar controls */
+button,
+.mod-cta,
+.mod-warning {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 0 !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+}
+
+.clickable-icon,
+.nav-action-button,
+.titlebar-button,
+.side-dock-ribbon-action,
+.workspace-ribbon .clickable-icon,
+.metadata-add-button,
+.metadata-property-icon,
+.search-input-clear-button {
+  border-radius: 0 !important;
+}
+
+/* Inputs */
+input,
+textarea,
+select,
+.dropdown,
+.search-input-container input,
+.prompt-input,
+.metadata-input,
+.metadata-input-longtext,
+.workspace-leaf-content[data-type="search"] input {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 0 !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px !important;
+  letter-spacing: 0.04em;
+}
+
+/* Checkboxes */
+input[type="checkbox"],
+.task-list-item-checkbox {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 0 !important;
+}
+
+/* Structural divider thickness */
+.view-header,
+.workspace-tab-header-container,
+.workspace-leaf-resize-handle,
+.workspace-split.mod-left-split,
+.workspace-split.mod-right-split,
+.workspace-sidedock-vault-profile,
+.status-bar,
+.mod-root .workspace-tab-header-container,
+.metadata-container,
+.metadata-property,
+.setting-item,
+.vertical-tab-header,
+.vertical-tab-content,
+.nav-header,
+.search-result-file-match,
+.backlink-pane > .tree-item-self {
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+hr,
+.markdown-rendered hr {
+  border-width: 0;
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+/* Tables, quotes, code blocks, and callouts */
+.markdown-rendered blockquote,
+.cm-quote {
+  border-left-width: 1px !important;
+  border-left-style: solid !important;
+}
+
+.markdown-rendered table {
+  border-collapse: collapse;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.markdown-rendered th,
+.markdown-rendered td {
+  border-width: 1px;
+  border-style: solid;
+}
+
+.markdown-rendered th {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.markdown-rendered pre,
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-codeblock,
+.callout,
+.markdown-rendered .callout {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 0 !important;
+}
+
+.callout-title,
+.callout-title-inner {
+  font-size: 10px !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+}
+
+/* Scrollbar thickness */
+* {
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0;
+}

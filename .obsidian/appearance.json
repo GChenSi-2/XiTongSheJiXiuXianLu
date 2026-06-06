@@ -4,6 +4,7 @@
   "cssTheme": "Minimal",
   "enabledCssSnippets": [
     "flowing-bg",
-    "pdf-frosted"
+    "pdf-frosted",
+    "minimal-editorial-fashion"
   ]
 }
