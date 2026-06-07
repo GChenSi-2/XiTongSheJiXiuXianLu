@@ -1,4 +1,4 @@
-﻿---
+---
 created: 2026-06-07 01:34 +09:00
 type: session-summary
 tags:

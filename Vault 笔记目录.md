@@ -72,9 +72,9 @@ excludes:
   - [[Tooltip 组件拆分设计]]
   - [[typescript-cheatsheet]]
   - [[CookBook]]
-  - [[控制反转-IoC-笔记.md]]
+  - [[控制反转-IoC-笔记]]
   - [[提示词.md]]
-  - [[组件拆分 - 容器组件与展示组件.md]]
+  - [[组件拆分 - 容器组件与展示组件]]
 
 ### anaconda_projects
 
