@@ -6,7 +6,7 @@
  * 一键通过 Anaconda 启动 Jupyter Lab，并在浏览器中打开当前活动笔记。
  * 启动方式参考用户的 通过anaconda启动JupyterLab.bat：
  *   1. 优先使用 conda 环境下的 jupyter.exe（直接 spawn，无需走 cmd）。
- *   2. 若无法定位，则回退到 cmd.exe /c "call activate.bat env && jupyter.exe lab ..."。
+ *   2. 若无法定位，则回退到 cmd.exe /c "call conda.bat activate env && jupyter.exe lab ..."。
  */
 
 const obsidian = require('obsidian');
@@ -15,14 +15,17 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const crypto = require('crypto');
+const os = require('os');
 
 const DEFAULT_SETTINGS = {
   // 默认匹配用户的 通过anaconda启动JupyterLab.bat
-  condaActivatePath: 'C:\\Users\\user\\anaconda3\\Scripts\\activate.bat',
+  // 使用 conda.bat 而不是 Scripts\activate.bat：
+  // 当前机器的 activate.bat 被 mamba 接管，普通 cmd 子进程里可能报 “Shell not initialized”。
+  condaActivatePath: 'C:\\Users\\user\\anaconda3\\condabin\\conda.bat',
   condaEnv: 'base',
   // 留空 = 自动从 conda 路径推导；填写则跳过推导
   jupyterExecutable: '',
-  // true（默认）= 通过 cmd.exe 先 call activate.bat 激活环境再启动 jupyter.exe
+  // true（默认）= 通过 cmd.exe 先 call conda.bat/activate.bat 激活环境再启动 jupyter.exe
   //               这样能完整保留 Anaconda 工具栏 / Navigator 等依赖 conda 环境变量的扩展。
   // false = 直接 spawn 推导出来的 jupyter.exe，更快但 Anaconda 集成可能缺失。
   useCondaActivate: true,
@@ -84,8 +87,11 @@ class JupyterManager {
   deriveJupyterExe(settings) {
     const activate = settings.condaActivatePath || '';
     if (!activate) return null;
-    const scriptsDir = path.dirname(activate);            // ...\anaconda3\Scripts
-    const condaRoot = path.dirname(scriptsDir);            // ...\anaconda3
+    const activateDir = path.dirname(activate);            // ...\anaconda3\Scripts 或 ...\anaconda3\condabin
+    const activateDirName = path.basename(activateDir).toLowerCase();
+    const condaRoot = ['scripts', 'condabin'].includes(activateDirName)
+      ? path.dirname(activateDir)
+      : activateDir;
     const env = (settings.condaEnv || 'base').trim();
     const exeName = process.platform === 'win32' ? 'jupyter.exe' : 'jupyter';
     if (env === 'base' || env === '') {
@@ -177,7 +183,7 @@ class JupyterManager {
     }
 
     // 超时：清理
-    try { this._killChild(child); } catch (_) { /* ignore */ }
+    try { await this._killChild(child); } catch (_) { /* ignore */ }
     if (this.process === child) {
       this.process = null;
       this.token = null;
@@ -215,7 +221,7 @@ class JupyterManager {
       const activate = settings.condaActivatePath;
       const env = (settings.condaEnv || 'base').trim();
       if (!activate || !tryDirect(activate)) {
-        throw new Error(`找不到 conda activate.bat：${activate || '(未设置)'}`);
+        throw new Error(`找不到 Conda 激活脚本：${activate || '(未设置)'}`);
       }
       // 给 jupyter 参数中带空格的部分加双引号（cmd.exe 用双引号区分参数）。
       // cmd 不认识 \" 这种 C 风格转义；好在我们的参数里不含字面量引号，
@@ -223,9 +229,13 @@ class JupyterManager {
       const argStr = args
         .map((a) => (/\s/.test(a) ? `"${a}"` : a))
         .join(' ');
-      // call 后接 activate.bat，再 && 连接 jupyter.exe；
+      // call 后接 conda.bat/activate.bat，再 && 连接 jupyter.exe；
       // 不写绝对路径：activate 完成后 jupyter.exe 在 PATH 顶端
-      const fullCmd = `call "${activate}" "${env}" && jupyter.exe ${argStr}`;
+      const activateBase = path.basename(activate).toLowerCase();
+      const activateCmd = activateBase === 'conda.bat'
+        ? `call "${activate}" activate "${env}"`
+        : `call "${activate}" "${env}"`;
+      const fullCmd = `${activateCmd} && jupyter.exe ${argStr}`;
       cmd = 'cmd.exe';
       cmdArgs = ['/d', '/s', '/c', fullCmd];
       // verbatim=true 让 Node 不再 escape 参数 —— 否则 fullCmd 里的 " 会被改成 \"，
@@ -269,26 +279,178 @@ class JupyterManager {
     return child;
   }
 
+  _requestShutdown(port, token) {
+    return new Promise((resolve) => {
+      if (!port) return resolve(false);
+
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Length': '0',
+      };
+      if (token) headers.Authorization = `token ${token}`;
+
+      const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+      const req = http.request(
+        {
+          hostname: '127.0.0.1',
+          port,
+          path: `/api/shutdown${tokenParam}`,
+          method: 'POST',
+          headers,
+          timeout: 4000,
+        },
+        (res) => {
+          const ok = res.statusCode !== undefined && res.statusCode >= 200 && res.statusCode < 300;
+          this.log(ok ? 'info' : 'warn', `Jupyter shutdown API returned ${res.statusCode} on port ${port}`);
+          res.resume();
+          resolve(ok);
+        }
+      );
+      req.on('error', (err) => {
+        this.log('warn', `Jupyter shutdown API failed on port ${port}: ${err.message}`);
+        resolve(false);
+      });
+      req.on('timeout', () => {
+        this.log('warn', `Jupyter shutdown API timed out on port ${port}`);
+        req.destroy();
+        resolve(false);
+      });
+      req.end();
+    });
+  }
+
+  async _waitUntilStopped(port, timeoutMs) {
+    if (!port) return true;
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      if (!(await this.isAlive(port))) return true;
+      await sleep(300);
+    }
+    return !(await this.isAlive(port));
+  }
+
   _killChild(child) {
-    if (!child || child.killed) return;
+    if (!child || child.killed) return Promise.resolve(false);
     if (process.platform === 'win32' && child.pid) {
       // 用 taskkill 干掉整个进程树（cmd.exe + jupyter.exe + python.exe）
-      try {
-        spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], { windowsHide: true });
-      } catch (e) {
-        try { child.kill(); } catch (_) { /* ignore */ }
-      }
-    } else {
-      try { child.kill(); } catch (_) { /* ignore */ }
+      return new Promise((resolve) => {
+        let killer;
+        try {
+          killer = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], { windowsHide: true });
+        } catch (e) {
+          this.log('warn', `taskkill spawn failed: ${e.message}`);
+          try { child.kill(); resolve(true); } catch (_) { resolve(false); }
+          return;
+        }
+        killer.on('error', (err) => {
+          this.log('warn', `taskkill failed: ${err.message}`);
+          try { child.kill(); resolve(true); } catch (_) { resolve(false); }
+        });
+        killer.on('exit', (code, signal) => {
+          this.log('info', `taskkill exited (code=${code}, signal=${signal})`);
+          resolve(code === 0);
+        });
+      });
     }
+    try { child.kill(); return Promise.resolve(true); } catch (_) { return Promise.resolve(false); }
+  }
+
+  _getRuntimeDirs() {
+    const dirs = [];
+    const add = (dir) => {
+      if (dir && !dirs.includes(dir)) dirs.push(dir);
+    };
+
+    add(process.env.JUPYTER_RUNTIME_DIR);
+    if (process.platform === 'win32') {
+      if (process.env.APPDATA) add(path.join(process.env.APPDATA, 'jupyter', 'runtime'));
+    } else if (process.platform === 'darwin') {
+      add(path.join(os.homedir(), 'Library', 'Jupyter', 'runtime'));
+    } else {
+      add(path.join(os.homedir(), '.local', 'share', 'jupyter', 'runtime'));
+    }
+    return dirs.filter((dir) => {
+      try { return fs.existsSync(dir); } catch (_) { return false; }
+    });
+  }
+
+  _cleanupRuntimeFiles(port) {
+    if (!port) return [];
+    const removed = [];
+    for (const dir of this._getRuntimeDirs()) {
+      let entries;
+      try {
+        entries = fs.readdirSync(dir);
+      } catch (e) {
+        this.log('warn', `Cannot read Jupyter runtime dir ${dir}: ${e.message}`);
+        continue;
+      }
+
+      for (const name of entries) {
+        if (!/^(jpserver|nbserver)-\d+\.json$/i.test(name)) continue;
+        const filePath = path.join(dir, name);
+        let info;
+        try {
+          info = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        } catch (e) {
+          this.log('warn', `Cannot parse Jupyter runtime file ${filePath}: ${e.message}`);
+          continue;
+        }
+        if (Number(info.port) !== Number(port)) continue;
+
+        const stem = name.replace(/\.json$/i, '');
+        for (const candidate of [filePath, path.join(dir, `${stem}-open.html`)]) {
+          try {
+            if (fs.existsSync(candidate)) {
+              fs.unlinkSync(candidate);
+              removed.push(candidate);
+            }
+          } catch (e) {
+            this.log('warn', `Cannot remove stale Jupyter runtime file ${candidate}: ${e.message}`);
+          }
+        }
+      }
+    }
+    if (removed.length) {
+      this.log('info', `Removed stale Jupyter runtime files: ${removed.join(', ')}`);
+    }
+    return removed;
   }
 
   async stop() {
-    if (!this.process) return;
-    this._killChild(this.process);
-    this.process = null;
-    this.token = null;
-    this.port = null;
+    const child = this.process;
+    const token = this.token;
+    const port = this.port;
+    if (!child && !port) return;
+
+    let stopped = false;
+    if (port && await this.isAlive(port)) {
+      // 先让 Jupyter 自己执行 /api/shutdown，避免留下 jpserver-*.json 残留记录。
+      const requested = await this._requestShutdown(port, token);
+      if (requested) {
+        stopped = await this._waitUntilStopped(port, 12_000);
+      }
+    } else {
+      stopped = true;
+    }
+
+    if (!stopped) {
+      // 优雅停止失败时，再强杀插件启动的整棵进程树。
+      await this._killChild(child);
+      stopped = await this._waitUntilStopped(port, 5000);
+    }
+
+    if (stopped) {
+      this._cleanupRuntimeFiles(port);
+    } else if (port) {
+      this.log('warn', `Jupyter on port ${port} still appears to be running; runtime files were not removed.`);
+    }
+
+    if (this.process === child || this.port === port) {
+      this.process = null;
+      this.token = null;
+      this.port = null;
+    }
     this.plugin.updateStatus();
   }
 
@@ -319,11 +481,11 @@ class JupyterLauncherSettingTab extends obsidian.PluginSettingTab {
     });
 
     new obsidian.Setting(containerEl)
-      .setName('Conda activate.bat 路径')
-      .setDesc('Anaconda 的 activate.bat 绝对路径。')
+      .setName('Conda 激活脚本路径')
+      .setDesc('推荐使用 Anaconda 的 condabin\\conda.bat；也兼容 Scripts\\activate.bat。')
       .addText((text) =>
         text
-          .setPlaceholder('C:\\Users\\<user>\\anaconda3\\Scripts\\activate.bat')
+          .setPlaceholder('C:\\Users\\<user>\\anaconda3\\condabin\\conda.bat')
           .setValue(this.plugin.settings.condaActivatePath)
           .onChange(async (val) => {
             this.plugin.settings.condaActivatePath = val.trim();
@@ -612,7 +774,12 @@ class JupyterLauncherPlugin extends obsidian.Plugin {
     const ext = (file.extension || '').toLowerCase();
     const useFactory = ext === 'md' && this.settings.useJupytext;
     const base = `http://localhost:${this.manager.port}/lab/tree/${this.encodePath(file.path)}`;
-    const params = [`token=${encodeURIComponent(this.manager.token)}`];
+    const params = [
+      `token=${encodeURIComponent(this.manager.token)}`,
+      // Anaconda Assistant 前端只会在 URL 带 open_assistant=true 时主动展开侧栏。
+      // 不带这个参数时，@anaconda/assistant 仍然已加载，但面板可能保持隐藏。
+      'open_assistant=true',
+    ];
     if (useFactory) params.push('factory=Notebook');
     return `${base}?${params.join('&')}`;
   }
@@ -654,7 +821,7 @@ class JupyterLauncherPlugin extends obsidian.Plugin {
     const notice = new obsidian.Notice('正在启动 Jupyter Lab…', 0);
     try {
       const { url, token, port } = await this.manager.ensureRunning();
-      window.open(`${url}/lab?token=${encodeURIComponent(token)}`);
+      window.open(`${url}/lab?token=${encodeURIComponent(token)}&open_assistant=true`);
       new obsidian.Notice(`Jupyter Lab 已启动 (port ${port})`);
     } catch (e) {
       console.error('[JupyterLauncher] start failed:', e);

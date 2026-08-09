@@ -64,10 +64,10 @@ conda create -n r-seurat -c conda-forge r-base r-irkernel jupyterlab
 
 解释：
 
-| 包名 | 作用 |
-|---|---|
-| `r-base` | 安装 R 语言本体 |
-| `r-irkernel` | 让 JupyterLab 支持 R kernel |
+| 包名           | 作用                              |
+| ------------ | ------------------------------- |
+| `r-base`     | 安装 R 语言本体                       |
+| `r-irkernel` | 让 JupyterLab 支持 R kernel        |
 | `jupyterlab` | 可选，但建议装，保证这个环境自己也能启动 JupyterLab |
 
 创建过程中如果出现：
