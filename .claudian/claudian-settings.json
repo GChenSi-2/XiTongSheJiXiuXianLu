@@ -212,7 +212,7 @@
       "reasoningSummary": "auto",
       "environmentVariables": "",
       "environmentHash": "runtime-input:v1:5040bddab3d6b4ae5295bd5498eca4b05eceba8e50ce8da0467e80344ae57768",
-      "catalogTimestamp": 1786284481331,
+      "catalogTimestamp": 1786286203924,
       "catalogFingerprint": "2:79cfeb705a4a715f9b5911fbb0b4930fe718566f3aa8db27017d70ea27476463",
       "installationMethodsByHost": {
         "device:7499903c-3b08-406e-89b7-624f93a93679": "native-windows"

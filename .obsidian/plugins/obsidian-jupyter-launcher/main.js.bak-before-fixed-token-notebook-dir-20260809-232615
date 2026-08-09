@@ -31,10 +31,10 @@ const DEFAULT_SETTINGS = {
   useCondaActivate: true,
   port: 8888,
   portRetries: 5,
-  // 固定 token：匹配 Jupyter MCP / 手动访问
-  token: 'silicon-jupyter-mcp-2026',
-  // 固定 notebook-dir：Jupyter 工作目录
-  workDir: "C:\\Users\\user\\Desktop\\Silicon's AI Lab",
+  // 留空 = 启动时随机生成
+  token: '',
+  // 留空 = 使用 vault 根目录
+  workDir: '',
   // 透传给 jupyter lab 的额外参数（空格分隔）
   extraArgs: '',
   // 是否对 .md 走 jupytext 的 ?factory=Notebook
@@ -103,16 +103,12 @@ class JupyterManager {
   buildArgs(settings, port, token, workDir) {
     const args = [
       'lab',
-      // 等价于命令：
-      // jupyter lab --IdentityProvider.token silicon-jupyter-mcp-2026 --notebook-dir "C:\\Users\\user\\Desktop\\Silicon's AI Lab"
-      // 额外保留 --no-browser/--port：避免 Jupyter 自己重复开浏览器，并让插件能稳定追踪端口。
       '--no-browser',
       `--port=${port}`,
       '--ServerApp.open_browser=False',
-      '--IdentityProvider.token',
-      token,
-      '--notebook-dir',
-      workDir,
+      '--IdentityProvider.token=' + token,
+      '--ServerApp.password=',
+      `--ServerApp.root_dir=${workDir}`,
     ];
     const extra = (settings.extraArgs || '').trim();
     if (extra) {
@@ -145,7 +141,7 @@ class JupyterManager {
     // 去掉末尾分隔符，避免 Windows 命令行 `\"` 转义问题
     workDir = workDir.replace(/[\\/]+$/, '');
 
-    const token = (settings.token && settings.token.trim()) || DEFAULT_SETTINGS.token || this.generateToken();
+    const token = (settings.token && settings.token.trim()) || this.generateToken();
 
     // 寻找一个空闲端口（最多尝试 portRetries 次）
     const startPort = settings.port;
@@ -573,11 +569,11 @@ class JupyterLauncherSettingTab extends obsidian.PluginSettingTab {
       );
 
     new obsidian.Setting(containerEl)
-      .setName('固定 Token')
-      .setDesc('默认使用 silicon-jupyter-mcp-2026；留空时也会回退到该固定 token。')
+      .setName('固定 Token（可选）')
+      .setDesc('留空则每次启动随机生成。设置后多次启动复用，方便手动访问 URL。')
       .addText((text) =>
         text
-          .setPlaceholder('silicon-jupyter-mcp-2026')
+          .setPlaceholder('（留空 = 随机生成）')
           .setValue(this.plugin.settings.token)
           .onChange(async (val) => {
             this.plugin.settings.token = val.trim();
@@ -586,11 +582,11 @@ class JupyterLauncherSettingTab extends obsidian.PluginSettingTab {
       );
 
     new obsidian.Setting(containerEl)
-      .setName('工作目录（notebook-dir）')
-      .setDesc('Jupyter 的 --notebook-dir。默认使用当前 vault 根目录。')
+      .setName('工作目录（root_dir）')
+      .setDesc('Jupyter 的 --ServerApp.root_dir。留空 = vault 根目录。')
       .addText((text) =>
         text
-          .setPlaceholder("C:\\Users\\user\\Desktop\\Silicon's AI Lab")
+          .setPlaceholder('（留空 = vault 根目录）')
           .setValue(this.plugin.settings.workDir)
           .onChange(async (val) => {
             this.plugin.settings.workDir = val.trim();

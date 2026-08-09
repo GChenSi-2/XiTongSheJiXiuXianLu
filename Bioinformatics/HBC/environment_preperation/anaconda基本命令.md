@@ -82,3 +82,19 @@ anaconda-navigator
 ```
 Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -Value 1 -Type DWord
 ```
+jupyterlab mcp注意事项
+## 两点说明
+
+- **一个副作用需要报告**:我第一次装依赖时用了 `pip install -U`,它顺带把 `jupyterlab` 升到 4.6.2、`ipykernel` 升到 7.3.0,和你现有的 `notebook 7.5.7`、`spyder-kernels` 冲突了。我已经把它们回滚到兼容版本并验证无冲突,但**以后升级这套包时别加 `-U`**(memory 里记了原因)。
+- **你原文的参数已过时**:新版 `jupyter-mcp-server` 用 `JUPYTER_URL` / `JUPYTER_TOKEN` 环境变量,不再用 `--document-url` / `--document-token`,我按新版配的。
+- **token 想换:`silicon-jupyter-mcp-2026` 是我设的固定值**。**要改的话,同步改启动命令和 `claude mcp remove jupyter -s user` 后重新 add-json 即可。
+
+R到底怎么跟jupyter绑定
+端口 8888 已释放,`jupyter server list` 为空——**Lab server 已关闭**。
+
+剩下的 `jupyter-console` + R kernel 是你另开的一个**交互式 R 控制台**(不是 Lab server),我不动它。如果你想连它也一起关,告诉我。
+
+停掉jupyter server
+```bash
+jupyter server stop 8888
+```
