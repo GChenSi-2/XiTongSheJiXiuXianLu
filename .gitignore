@@ -44,3 +44,6 @@ Bioinformatics/HBC/workspace/**/data/
 
 # macOS 压缩包残留
 __MACOSX/
+
+/_ai-assistant/current-note.json
+/.gitignore
