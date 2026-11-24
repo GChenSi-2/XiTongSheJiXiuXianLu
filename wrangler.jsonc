@@ -1,0 +1,11 @@
+// Cloudflare Workers 静态站点配置：notes.silicon.fyi
+// 构建命令 bash publish/build.sh 生成 ./public，部署命令 npx wrangler deploy 上传它。
+// name 必须和 Cloudflare 面板里的 Worker 名称一致。
+{
+  "name": "silicon-notes",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  }
+}
