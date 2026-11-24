@@ -37,14 +37,14 @@ Content-Security-Policy: <指令> <来源>; <指令> <来源>;
 
 ### 常用来源值
 
-|值|含义|
-|---|---|
-|`'self'`|只允许同源|
-|`'none'`|全部禁止|
-|`'unsafe-inline'`|允许内联脚本/样式（存在风险，尽量避免）|
-|`'unsafe-eval'`|允许 `eval()` 等动态执行（存在风险）|
-|`https://cdn.example.com`|指定白名单域名|
-|`'nonce-xxxx'`|带 nonce 令牌的内联脚本（推荐替代 unsafe-inline）|
+| 值                         | 含义                                  |
+| ------------------------- | ----------------------------------- |
+| `'self'`                  | 只允许同源                               |
+| `'none'`                  | 全部禁止                                |
+| `'unsafe-inline'`         | 允许内联脚本/样式（存在风险，尽量避免）                |
+| `'unsafe-eval'`           | 允许 `eval()` 等动态执行（存在风险）             |
+| `https://cdn.example.com` | 指定白名单域名                             |
+| `'nonce-xxxx'`            | 带 nonce 令牌的内联脚本（推荐替代 unsafe-inline） |
 
 ---
 

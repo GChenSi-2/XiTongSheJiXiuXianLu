@@ -1,4 +1,4 @@
-﻿# NotebookLM Prompt
+# NotebookLM Prompt
 
 Notebook: https://notebooklm.google.com/notebook/82628d5e-bb3a-48af-9d8b-55b763d4a880
 Course: Frontend Masters - Web Dev Quiz - Q13 WeakMap

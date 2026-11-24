@@ -40,10 +40,10 @@ OS 启动一个程序的基本流程（**尚无限制**）：
 
 #### 两种执行模式
 
-| 模式 | 权限 | 谁在用 |
-|------|------|--------|
-| **User mode** | 受限，不能执行特权指令（如 I/O） | 普通程序 |
-| **Kernel mode** | 全权限，可执行任何指令 | OS / kernel |
+| 模式              | 权限                 | 谁在用         |
+| --------------- | ------------------ | ----------- |
+| **User mode**   | 受限，不能执行特权指令（如 I/O） | 普通程序        |
+| **Kernel mode** | 全权限，可执行任何指令        | OS / kernel |
 
 User mode 若尝试做特权操作 → 硬件抛异常 → OS 通常直接把它杀掉。
 
@@ -141,10 +141,11 @@ OS 夺回 CPU 后，由 **scheduler** 决定继续跑 A 还是切换到 B。
 
 #### 两种寄存器保存的对照（⚠️ 重要）
 
-| 时机 | 保存谁的寄存器 | 谁保存 | 存到哪 |
-|------|----------------|--------|--------|
-| **进 kernel 时**（trap / timer int.） | user 的寄存器 | **硬件** 隐式 | 该进程的 kernel stack |
-| **Context switch 时**（A→B） | kernel 的寄存器 | **OS 软件** 显式 | 各自的 process structure |
+| 时机                                | 保存谁的寄存器     | 谁保存          | 存到哪                   |
+| --------------------------------- | ----------- | ------------ | --------------------- |
+| **进 kernel 时**（trap / timer int.） | user 的寄存器   | **硬件** 隐式    | 该进程的 kernel stack     |
+| **Context switch 时**（A→B）         | kernel 的寄存器 | **OS 软件** 显式 | 各自的 process structure |
+|                                   |             |              |                       |
 
 Context switch 的精妙之处：kernel 在 A 的上下文中「进入」switch 函数，却在 B 的上下文中「返回」——因为 stack 被换掉了。
 
@@ -210,6 +211,7 @@ Handler 执行中又来中断怎么办？
 | **Scheduler**               | 决定下一个跑谁（下一章主题）                              |
 | **Context switch**          | OS 以软件保存 / 还原 kernel regs，切换 kernel stack   |
 | **Privileged instructions** | 只能在 kernel mode 执行（设 trap table、启停 timer……） |
+|                             |                                             |
 
 ---
 

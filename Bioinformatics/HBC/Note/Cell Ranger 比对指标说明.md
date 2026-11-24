@@ -4,15 +4,15 @@
 
 Cell Ranger 输出的 `metrics_summary.csv` 中包含以下一组反映测序 reads 比对情况的指标：
 
-|指标|数值|
-|---|---|
-|Reads Mapped to Genome|97.0%|
-|Reads Mapped Confidently to Genome|95.6%|
-|Reads Mapped Confidently to Intergenic Regions|1.9%|
-|Reads Mapped Confidently to Intronic Regions|14.4%|
-|Reads Mapped Confidently to Exonic Regions|79.3%|
-|Reads Mapped Confidently to Transcriptome|88.2%|
-|Reads Mapped Antisense to Gene|5.2%|
+| 指标                                             | 数值    |
+| ---------------------------------------------- | ----- |
+| Reads Mapped to Genome                         | 97.0% |
+| Reads Mapped Confidently to Genome             | 95.6% |
+| Reads Mapped Confidently to Intergenic Regions | 1.9%  |
+| Reads Mapped Confidently to Intronic Regions   | 14.4% |
+| Reads Mapped Confidently to Exonic Regions     | 79.3% |
+| Reads Mapped Confidently to Transcriptome      | 88.2% |
+| Reads Mapped Antisense to Gene                 | 5.2%  |
 
 **Reads Mapped to Genome（97.0%）** 所有测序 reads 中，能够比对到参考基因组上（不管是唯一比对还是多重比对，也不管置信度高低）的比例，是最宽泛的统计口径。
 

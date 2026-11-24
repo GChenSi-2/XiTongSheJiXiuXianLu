@@ -33,3 +33,14 @@ desktop.ini
 /.claudian/claudian-settings.json
 /.gitignore
 /_ai-assistant/current-note.json
+# ===== 大型数据文件（scRNA-seq 原始/中间数据，超过 GitHub 100MB 上限，不进 git）=====
+Bioinformatics/HBC/Rworkspace/**/data/
+Bioinformatics/HBC/workspace/**/data/
+*.h5ad
+*.rds
+*.RData
+*.RData.bz2
+*.mtx.gz
+
+# macOS 压缩包残留
+__MACOSX/
