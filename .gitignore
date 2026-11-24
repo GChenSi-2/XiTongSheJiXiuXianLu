@@ -47,3 +47,7 @@ __MACOSX/
 
 /_ai-assistant/current-note.json
 /.gitignore
+
+# Quartz 发布构建产物
+/public/
+/.quartz-build/
