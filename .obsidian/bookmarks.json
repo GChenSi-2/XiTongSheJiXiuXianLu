@@ -30,6 +30,12 @@
           "type": "file",
           "ctime": 1779730523114,
           "path": "Bioinformatics/Bioinformatics Methods for Transcriptomics/ExperimentNote/WSL2_Bioinfo_Setup_Guide.md"
+        },
+        {
+          "type": "folder",
+          "ctime": 1795420454513,
+          "path": "Bioinformatics/HBC/Note",
+          "title": "生物信息分析流程笔记HBC单细胞分析"
         }
       ],
       "title": "Bioinformatics"
