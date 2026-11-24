@@ -51,3 +51,9 @@ __MACOSX/
 # Quartz 发布构建产物
 /public/
 /.quartz-build/
+
+# ===== JupyterLab 运行时文件（服务器运行时会锁住/频繁改写，不进 git）=====
+.jupyter_ystore.db
+.jupyter/collaboration_sessions.json
+.ipynb_checkpoints/
+.virtual_documents/
